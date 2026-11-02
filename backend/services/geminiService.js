@@ -119,13 +119,17 @@ const generateHeuristicAnalysis = (originalFilename = '', mimeType = '') => {
 };
 
 /**
- * Call Google Gemini 1.5 Flash Vision Model via Multimodal REST API
+ * Call Google Gemini Vision Model via Multimodal REST API
+ * Supports automated model failover across latest flash models (gemini-3.5-flash, gemini-3.7-flash, etc.)
  * @param {string} base64Data Base64-encoded image string
  * @param {string} mimeType e.g. 'image/jpeg', 'image/png'
  * @param {string} apiKey Google Gemini API key
  */
 const callGeminiVisionApi = async (base64Data, mimeType, apiKey) => {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const candidateModels = [
+    'gemini-3.5-flash',
+    'gemini-flash-latest',
+  ];
 
   const promptText = `
 You are an expert AI lost-and-found property cataloger for a university and city portal.
@@ -167,54 +171,70 @@ Return a valid JSON object matching this exact format:
     },
   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  let lastError = null;
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Gemini API error (${response.status}): ${errorBody}`);
+  for (const model of candidateModels) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(6000),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        lastError = new Error(`Gemini (${model}) error ${response.status}: ${errorBody}`);
+        console.warn(`[Gemini API] Model ${model} returned ${response.status}. Trying next model...`);
+        continue;
+      }
+
+      const jsonResponse = await response.json();
+      const textOutput = jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!textOutput) {
+        lastError = new Error(`Gemini (${model}) returned empty candidate content`);
+        continue;
+      }
+
+      // Parse structured JSON
+      let cleanJson = textOutput.trim();
+      if (cleanJson.startsWith('```json')) {
+        cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanJson.startsWith('```')) {
+        cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      const parsed = JSON.parse(cleanJson);
+
+      // Validate category against permitted enum
+      if (!VALID_CATEGORIES.includes(parsed.category)) {
+        parsed.category = 'Other';
+      }
+
+      return {
+        category: parsed.category || 'Other',
+        suggestedTitle: parsed.suggestedTitle || 'Reported Belonging',
+        primaryColor: parsed.primaryColor || 'Unspecified',
+        secondaryColors: Array.isArray(parsed.secondaryColors) ? parsed.secondaryColors : [],
+        brand: parsed.brand || 'Unknown',
+        description: parsed.description || 'Item cataloged by FinderSpot AI visual inspection.',
+        distinctiveFeatures: parsed.distinctiveFeatures || 'Standard appearance',
+        tags: Array.isArray(parsed.tags) ? parsed.tags : ['belonging', 'lost-and-found'],
+        aiSource: model,
+        keyConfigured: true,
+        confidence: 'high',
+      };
+    } catch (err) {
+      lastError = err;
+      console.warn(`[Gemini API] Failed with model ${model}:`, err.message);
+    }
   }
 
-  const jsonResponse = await response.json();
-  const textOutput = jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-  if (!textOutput) {
-    throw new Error('Gemini API returned empty candidate content');
-  }
-
-  // Parse structured JSON
-  let cleanJson = textOutput.trim();
-  if (cleanJson.startsWith('```json')) {
-    cleanJson = cleanJson.replace(/^```json\s*/, '').replace(/\s*```$/, '');
-  } else if (cleanJson.startsWith('```')) {
-    cleanJson = cleanJson.replace(/^```\s*/, '').replace(/\s*```$/, '');
-  }
-
-  const parsed = JSON.parse(cleanJson);
-
-  // Validate category against permitted enum
-  if (!VALID_CATEGORIES.includes(parsed.category)) {
-    parsed.category = 'Other';
-  }
-
-  return {
-    category: parsed.category || 'Other',
-    suggestedTitle: parsed.suggestedTitle || 'Reported Belonging',
-    primaryColor: parsed.primaryColor || 'Unspecified',
-    secondaryColors: Array.isArray(parsed.secondaryColors) ? parsed.secondaryColors : [],
-    brand: parsed.brand || 'Unknown',
-    description: parsed.description || 'Item cataloged by FinderSpot AI visual inspection.',
-    distinctiveFeatures: parsed.distinctiveFeatures || 'Standard appearance',
-    tags: Array.isArray(parsed.tags) ? parsed.tags : ['belonging', 'lost-and-found'],
-    aiSource: 'gemini-1.5-flash',
-    keyConfigured: true,
-    confidence: 'high',
-  };
+  throw lastError || new Error('All candidate Gemini models failed.');
 };
 
 /**
