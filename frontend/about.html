@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="dashboard.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Dashboard</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="about.html" class="px-3.5 py-2 rounded-lg text-sm font-semibold text-indigo-600 bg-indigo-50 transition-colors">About Us</a>
+          <a href="contact.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Contact</a>
+        </nav>
+
+        <div class="hidden md:flex items-center gap-3">
+          <a href="login.html" class="px-4 py-2 text-sm font-bold text-slate-700 hover:text-indigo-600 transition-colors">Sign In</a>
+          <a href="register.html" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold shadow-md hover:bg-indigo-700 transition-colors">Join Community</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-b from-indigo-50/70 via-white to-slate-50 py-20 text-center">
+    <div class="max-w-4xl mx-auto px-4">
+      <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-100/80 px-3 py-1 rounded-full">Our Purpose & Mission</span>
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight mt-4">
+        Connecting People. Protecting Belongings. Restoring Peace of Mind.
+      </h1>
+      <p class="text-slate-600 text-base sm:text-lg mt-4 max-w-2xl mx-auto leading-relaxed">
+        FinderSpot is a digital lost-and-found management ecosystem engineered to bridge students, faculty, staff, and campus safety teams with rapid verification and ethical return workflows.
+      </p>
+    </div>
+  </section>
+
+  <!-- Core Pillars -->
+  <section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      
+      <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-5">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Anti-Fraud Verification</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">
+          Our unique security challenge questions and serial verification prevent fraudulent claims, ensuring only genuine owners reclaim items.
+        </p>
+      </div>
+
+      <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl mb-5">
+          <i class="fas fa-bolt"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Smart Match Alerts</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">
+          Automated keyword and category matching scans the database constantly, immediately alerting victims when a matching item is registered.
+        </p>
+      </div>
+
+      <div class="bg-white p-8 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-5">
+          <i class="fas fa-hand-holding-heart"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 mb-2">Community Trust Network</h3>
+        <p class="text-sm text-slate-500 leading-relaxed">
+          Encouraging campus honesty and civic responsibility through verified user profiles, trust scores, and voluntary finder rewards.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Campus Partnership -->
+  <section class="bg-slate-900 text-white py-16">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Partnered with Campus Safety & Security</h2>
+      <p class="text-slate-400 text-sm sm:text-base mt-3 max-w-2xl mx-auto">
+        FinderSpot works directly alongside the Central Campus Security Desk in Building A, Room 104. High-value belongings such as laptops, wallets, and government IDs are kept in monitored custody vaults.
+      </p>
+      <div class="mt-8 flex justify-center gap-4">
+        <a href="contact.html" class="px-6 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 transition-colors">
+          Contact Security Desk
+        </a>
+        <a href="browse-items.html" class="px-6 py-3 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs hover:bg-slate-700 transition-colors">
+          Search Current Vault
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>&copy; 2026 FinderSpot Platform. Community Lost & Found Network.</p>
+      <div class="flex items-center gap-4">
+        <a href="contact.html" class="hover:text-indigo-600">Support Desk</a>
+        <a href="dashboard.html" class="hover:text-indigo-600">Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

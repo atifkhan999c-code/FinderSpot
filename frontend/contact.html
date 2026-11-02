@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact & Support | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="dashboard.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Dashboard</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="my-reports.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">My Reports</a>
+          <a href="report-lost.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+          <a href="contact.html" class="px-3.5 py-2 rounded-lg text-sm font-semibold text-indigo-600 bg-indigo-50 transition-colors">Contact</a>
+        </nav>
+
+        <!-- Right Action Items -->
+        <div class="hidden md:flex items-center gap-3">
+          <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> User Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Home</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Dashboard</a>
+      <a href="browse-items.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Browse Items</a>
+      <a href="my-reports.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">My Reports</a>
+      <a href="contact.html" class="block px-3 py-2 rounded-lg text-base font-semibold text-indigo-600 bg-indigo-50">Contact & Support</a>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <section class="bg-white border-b border-slate-200 py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center max-w-3xl">
+      <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Help Desk & Support</span>
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-3">We're Here to Help You Recover Your Belongings</h1>
+      <p class="text-slate-500 text-sm sm:text-base mt-2">Have a question regarding an unclaimed item, security verification, or need assistance? Reach out to our campus office.</p>
+    </div>
+  </section>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+    
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
+      
+      <!-- Left Column: Contact Cards & Office Details (5 cols) -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- Physical Office Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-5">
+            <i class="fas fa-building"></i>
+          </div>
+          <h2 class="text-lg font-bold text-slate-900">Central Lost & Found Desk</h2>
+          <p class="text-xs text-slate-500 mt-1">Campus Student Center, Building A, Room 104 (Ground Floor opposite Registrar)</p>
+
+          <div class="mt-6 space-y-3 pt-6 border-t border-slate-100 text-xs">
+            <div class="flex items-center gap-3 text-slate-600">
+              <i class="far fa-clock text-indigo-600 w-4"></i>
+              <span><strong>Mon – Fri:</strong> 8:00 AM – 5:00 PM</span>
+            </div>
+            <div class="flex items-center gap-3 text-slate-600">
+              <i class="far fa-clock text-indigo-600 w-4"></i>
+              <span><strong>Saturday:</strong> 10:00 AM – 2:00 PM</span>
+            </div>
+            <div class="flex items-center gap-3 text-slate-600">
+              <i class="fas fa-phone-alt text-indigo-600 w-4"></i>
+              <span><strong>Direct Line:</strong> +1 (555) 019-2831</span>
+            </div>
+            <div class="flex items-center gap-3 text-slate-600">
+              <i class="far fa-envelope text-indigo-600 w-4"></i>
+              <span><strong>Email:</strong> lostfound@campus.edu</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campus Security Card -->
+        <div class="bg-rose-50 border border-rose-200/80 rounded-3xl p-6 sm:p-8">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-rose-950">Campus Police & Emergency</h3>
+              <p class="text-xs text-rose-700">For stolen or high-value suspicious items</p>
+            </div>
+          </div>
+          <p class="text-xs text-rose-800 leading-relaxed mb-4">
+            If you suspect an item was stolen or contains sensitive government credentials, contact campus security dispatch directly.
+          </p>
+          <p class="text-sm font-bold text-rose-900">
+            <i class="fas fa-phone-volume mr-1.5"></i> 24/7 Security Hotline: +1 (555) 911-0022
+          </p>
+        </div>
+
+        <!-- Location Map Placeholder Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 overflow-hidden">
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Campus Pickup Map</h3>
+          <div class="h-44 rounded-2xl bg-slate-100 border border-slate-200 flex flex-col items-center justify-center text-slate-400 relative overflow-hidden group">
+            <img src="https://images.unsplash.com/photo-1524813686514-a57563d77d66?auto=format&fit=crop&w=600&q=80" alt="Map" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-slate-900/30 flex flex-col items-center justify-center text-white p-4 text-center">
+              <i class="fas fa-map-pin text-2xl text-rose-500 mb-1 animate-bounce"></i>
+              <p class="text-xs font-bold">Student Center - Room 104</p>
+              <span class="text-[10px] text-slate-200">Central Exchange & Custody Locker</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Support / Message Form (7 cols) -->
+      <div class="lg:col-span-7">
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-10">
+          <h2 class="text-xl font-bold text-slate-900 mb-2">Send an Inquiry to Lost & Found Staff</h2>
+          <p class="text-xs text-slate-500 mb-8">Fill in your inquiry and our desk officers will review the physical storage vaults and get back to you within 24 hours.</p>
+
+          <form id="contact-form" class="space-y-6">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label for="contact-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Your Full Name <span class="text-rose-500">*</span></label>
+                <input type="text" id="contact-name" required value="Alex" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              </div>
+
+              <div>
+                <label for="contact-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email Address <span class="text-rose-500">*</span></label>
+                <input type="email" id="contact-email" required value="alex.morgan@campus.edu" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label for="contact-subject" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Inquiry Topic <span class="text-rose-500">*</span></label>
+                <select id="contact-subject" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                  <option value="Lost Item Status">Check Status of a Lost Item</option>
+                  <option value="Physical Turn-In">Arranging Physical Item Turn-In</option>
+                  <option value="Dispute Claim">Report a False Ownership Claim</option>
+                  <option value="Custody Vault">Campus Security Storage Inquiry</option>
+                  <option value="General Feedback">General Platform Feedback</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="contact-item-id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Related Item ID (Optional)</label>
+                <input type="text" id="contact-item-id" placeholder="e.g. LF-1001" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              </div>
+            </div>
+
+            <div>
+              <label for="contact-message" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Detailed Message <span class="text-rose-500">*</span></label>
+              <textarea id="contact-message" rows="5" required placeholder="Please provide specific details or reference numbers so our staff can assist promptly..." class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"></textarea>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+              <i class="far fa-paper-plane text-xs"></i>
+              <span>Send Message to Support Desk</span>
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Frequently Asked Questions (Accordion) -->
+    <section class="max-w-4xl mx-auto">
+      <div class="text-center mb-10">
+        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Frequently Asked Questions</h2>
+        <p class="text-slate-500 text-xs mt-1">Common answers about reporting, claiming, and recovery policies</p>
+      </div>
+
+      <div class="space-y-4">
+        
+        <!-- FAQ 1 -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-slate-800">How long does the campus hold unclaimed property?</h4>
+            <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+          </div>
+          <p class="faq-content hidden text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100 leading-relaxed">
+            All found items turned in to the Central Lost & Found Office are securely logged and safely retained in our vaults for 90 calendar days. After 90 days, unclaimed clothing/books are donated to campus community charity, and electronic devices are recycled according to privacy data wiping standards.
+          </p>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-slate-800">How do I verify ownership if I don't have a purchase receipt?</h4>
+            <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+          </div>
+          <p class="faq-content hidden text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100 leading-relaxed">
+            You can verify ownership by unlocking a phone/laptop with your passcode, providing the lock screen image, stating identifying stickers or engravings, showing past photos with the item, or answering the confidential security question set by the founder.
+          </p>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-slate-800">Is there any fee or payment required to reclaim my item?</h4>
+            <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+          </div>
+          <p class="faq-content hidden text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100 leading-relaxed">
+            No. The campus lost-and-found service is 100% free of charge for all students, faculty, staff, and visitors. Finder rewards offered voluntarily by owners are managed directly between owners and finders.
+          </p>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 cursor-pointer" onclick="toggleFaq(this)">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-slate-800">What should I do if I find a student ID card or debit card?</h4>
+            <i class="fas fa-chevron-down text-xs text-slate-400 transition-transform"></i>
+          </div>
+          <p class="faq-content hidden text-xs text-slate-500 mt-3 pt-3 border-t border-slate-100 leading-relaxed">
+            Immediately report it on the portal under "Wallets & Cards" and bring the physical card to Room 104 or the nearest campus information desk. Staff will automatically send an internal campus notification to the student’s university email address.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>&copy; 2026 FinderSpot Platform. Community Lost & Found Network.</p>
+      <div class="flex items-center gap-4">
+        <a href="index.html" class="hover:text-indigo-600">Home</a>
+        <a href="browse-items.html" class="hover:text-indigo-600">Browse Items</a>
+        <a href="dashboard.html" class="hover:text-indigo-600">Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    function toggleFaq(el) {
+      const content = el.querySelector('.faq-content');
+      const icon = el.querySelector('.fa-chevron-down, .fa-chevron-up');
+      content.classList.toggle('hidden');
+      if (icon) {
+        if (content.classList.contains('hidden')) {
+          icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        } else {
+          icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+        }
+      }
+    }
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (typeof LFApp !== 'undefined') {
+        LFApp.showToast('Your inquiry has been submitted. Our desk will contact you shortly!', 'success');
+      }
+      document.getElementById('contact-message').value = '';
+      document.getElementById('contact-item-id').value = '';
+    });
+  </script>
+</body>
+</html>

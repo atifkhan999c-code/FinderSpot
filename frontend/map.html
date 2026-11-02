@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Geo-Map & Radius Explorer | FinderSpot</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Leaflet MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Leaflet Map Pin Styles */
+    .custom-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      color: white;
+      font-size: 13px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      border: 2.5px solid white;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .custom-marker:hover {
+      transform: scale(1.22);
+      z-index: 1000 !important;
+    }
+    .marker-lost {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    }
+    .marker-found {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .marker-center {
+      background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+      box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.35);
+      animation: pulse-ring 2s infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+      70% { box-shadow: 0 0 0 12px rgba(99, 102, 241, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+
+    /* MarkerCluster Custom Overrides */
+    .marker-cluster-small, .marker-cluster-medium, .marker-cluster-large {
+      background-color: rgba(99, 102, 241, 0.25) !important;
+    }
+    .marker-cluster-small div, .marker-cluster-medium div, .marker-cluster-large div {
+      background-color: #4f46e5 !important;
+      color: white !important;
+      font-weight: 800 !important;
+      font-size: 13px !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+
+    /* Leaflet popup styling */
+    .leaflet-popup-content-wrapper {
+      padding: 0 !important;
+      overflow: hidden !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid rgba(226, 232, 240, 0.8) !important;
+    }
+    .leaflet-popup-content {
+      margin: 0 !important;
+      line-height: normal !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+    }
+    .leaflet-popup-tip {
+      background: white !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col h-screen overflow-hidden">
+
+  <!-- Main Navigation Bar -->
+  <header class="flex-shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Geo-Radius Explorer</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="browse-items.html" class="px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="map.html" class="px-3 py-2 rounded-lg text-sm font-bold text-indigo-600 bg-indigo-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-map-marked-alt text-xs"></i> Live Map
+          </a>
+          <a href="report-lost.html" class="px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+        </nav>
+
+        <!-- Right User Actions -->
+        <div class="hidden md:flex items-center gap-3">
+          <!-- Real-Time Chat Button -->
+          <button class="open-chat-trigger relative p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Messages & Peer Chat">
+            <i class="far fa-comments text-lg"></i>
+            <span class="chat-nav-badge hidden absolute top-1 right-1 w-4 h-4 bg-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <a href="notifications.html" class="relative p-2 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Avatar">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate user-display-email">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="admin.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-shield-alt w-4 text-slate-400"></i> Admin Desk
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile view switcher -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="mobile-toggle-btn" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 text-xs font-bold flex items-center gap-1.5">
+            <i class="fas fa-list"></i> <span id="mobile-toggle-text">Show List</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Map Filter Sub-Header Bar -->
+  <div class="flex-shrink-0 bg-white border-b border-slate-200 px-4 py-3 shadow-xs z-40">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Left Filters: Search, Type, Category -->
+      <div class="flex flex-wrap items-center gap-2.5 flex-grow sm:flex-grow-0">
+        <!-- Search Keyword -->
+        <div class="relative min-w-[200px] flex-grow sm:flex-grow-0">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="map-search-input" placeholder="Search items or tags..." class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+        </div>
+
+        <!-- Type Selector -->
+        <select id="map-type-filter" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="all">All Items (Lost & Found)</option>
+          <option value="lost">Lost Only (Red Pins)</option>
+          <option value="found">Found Only (Green Pins)</option>
+        </select>
+
+        <!-- Category Dropdown -->
+        <select id="map-category-filter" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="all">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Wallets & Cards">Wallets & Cards</option>
+          <option value="Keys">Keys</option>
+          <option value="Bags & Luggage">Bags & Luggage</option>
+          <option value="Books & Stationery">Books & Stationery</option>
+          <option value="Accessories">Accessories</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Right Proximity & Geo Controls -->
+      <div class="flex flex-wrap items-center gap-3">
+        
+        <!-- Radius Boundary Selector & Slider -->
+        <div class="flex items-center gap-2 bg-indigo-50/80 px-3 py-1.5 rounded-xl border border-indigo-100">
+          <i class="fas fa-bullseye text-indigo-600 text-xs"></i>
+          <span class="text-xs font-bold text-indigo-900">Radius:</span>
+          <select id="map-radius-select" class="bg-white border border-indigo-200 rounded-lg text-xs font-bold text-indigo-700 px-2 py-0.5 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="300">300 Meters (Immediate Quad)</option>
+            <option value="600">600 Meters (Campus Core)</option>
+            <option value="1200" selected>1.2 Km (Full Campus & Parking)</option>
+            <option value="3000">3.0 Km (Campus & Perimeter)</option>
+            <option value="5000">5.0 Km (City Radius)</option>
+            <option value="all">Unlimited (All Items)</option>
+          </select>
+        </div>
+
+        <!-- Campus Landmarks Preset Quick-Picker -->
+        <div class="hidden lg:flex items-center gap-1.5">
+          <select id="map-landmark-select" class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="">Jump to Landmark...</option>
+            <option value="center">Campus Center Plaza (Default)</option>
+            <option value="library">Main Campus Library</option>
+            <option value="union">Student Union Food Court</option>
+            <option value="science">Science & Engineering Hall</option>
+            <option value="lounge">Student Activity Lounge</option>
+            <option value="parking">West Parking Section B</option>
+            <option value="quad">Engineering Quad Plaza</option>
+            <option value="gym">Athletics Center</option>
+            <option value="security">Campus Security (Room 104)</option>
+            <option value="health">Health & Wellness Center</option>
+          </select>
+        </div>
+
+        <!-- GPS Locate Me Button -->
+        <button id="btn-locate-me" class="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5 shadow-sm">
+          <i class="fas fa-crosshairs text-indigo-400"></i> Locate Me
+        </button>
+
+        <!-- Reset Center Button -->
+        <button id="btn-reset-center" class="p-1.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Reset to Campus Center">
+          <i class="fas fa-undo-alt text-xs"></i>
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Main Map & Proximity List Split View -->
+  <main class="flex-grow flex relative overflow-hidden">
+    
+    <!-- Left Sidebar: Proximity Item Cards -->
+    <aside id="sidebar-container" class="w-full md:w-96 lg:w-[420px] bg-white border-r border-slate-200 flex flex-col z-20 transition-all duration-300 md:relative absolute inset-0 md:inset-auto md:translate-x-0 hidden md:flex">
+      
+      <!-- Sidebar Header / Status Bar -->
+      <div class="p-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <span>Nearby Belongings</span>
+            <span id="badge-total-count" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-bold">0</span>
+          </h2>
+          <p id="label-search-center" class="text-[11px] text-slate-500 mt-0.5 truncate">
+            Centered around: Campus Center Plaza
+          </p>
+        </div>
+        
+        <!-- Legend Pill -->
+        <div class="flex items-center gap-2 text-[10px] font-bold">
+          <span class="inline-flex items-center gap-1 text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Lost
+          </span>
+          <span class="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Found
+          </span>
+        </div>
+      </div>
+
+      <!-- Quick Summary Stats Bar -->
+      <div class="grid grid-cols-3 divide-x divide-slate-100 border-b border-slate-100 bg-white py-2 text-center text-xs">
+        <div>
+          <span id="stat-lost-count" class="block font-black text-rose-600 text-sm">0</span>
+          <span class="text-[10px] font-semibold text-slate-400 uppercase">Lost</span>
+        </div>
+        <div>
+          <span id="stat-found-count" class="block font-black text-emerald-600 text-sm">0</span>
+          <span class="text-[10px] font-semibold text-slate-400 uppercase">Found</span>
+        </div>
+        <div>
+          <span id="stat-closest-distance" class="block font-black text-indigo-600 text-sm">--</span>
+          <span class="text-[10px] font-semibold text-slate-400 uppercase">Nearest</span>
+        </div>
+      </div>
+
+      <!-- Scrollable Items List -->
+      <div id="items-list-container" class="flex-grow overflow-y-auto p-3 space-y-3 divide-y divide-slate-50">
+        <!-- Rendered dynamically -->
+        <div class="p-8 text-center text-slate-400">
+          <i class="fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2"></i>
+          <p class="text-xs font-medium">Scanning campus geo-radius...</p>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between text-xs text-slate-500">
+        <span class="flex items-center gap-1.5">
+          <i class="fas fa-info-circle text-indigo-500"></i> Click item to fly on map
+        </span>
+        <a href="report-lost.html" class="font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+          + Post Report
+        </a>
+      </div>
+
+    </aside>
+
+    <!-- Right Side: Interactive Leaflet Map Canvas -->
+    <section class="flex-grow relative h-full w-full">
+      
+      <!-- Leaflet Map Canvas Container -->
+      <div id="leaflet-map" class="w-full h-full z-10"></div>
+
+      <!-- Floating Map Overlays & Tooltips -->
+      <div class="absolute top-4 right-4 z-20 flex flex-col gap-2">
+        <!-- Center Target Draggable Pill -->
+        <div class="bg-white/95 backdrop-blur-md px-3 py-2 rounded-2xl shadow-lg border border-slate-200/80 text-xs flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-pulse"></div>
+          <div>
+            <p class="font-bold text-slate-800">Search Center</p>
+            <p id="map-coords-display" class="text-[10px] text-slate-500 font-mono">40.7295, -73.9965</p>
+          </div>
+        </div>
+
+        <!-- Radius Circle Active Indicator -->
+        <div class="bg-indigo-600 text-white px-3 py-1.5 rounded-xl shadow-lg text-[11px] font-bold flex items-center gap-1.5 self-end">
+          <i class="fas fa-ring text-indigo-200"></i>
+          <span id="radius-indicator-text">Radius: 1.2 km</span>
+        </div>
+      </div>
+
+      <!-- Floating Hint at Bottom Center -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+        <div class="bg-slate-900/85 backdrop-blur-md text-white text-xs font-medium px-4 py-2 rounded-full shadow-xl flex items-center gap-2 border border-slate-700/50">
+          <i class="fas fa-hand-pointer text-indigo-400"></i>
+          <span>Click anywhere on map to move search center & radius</span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Leaflet MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <!-- FinderSpot API & App Scripts -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+  
+  <!-- Interactive Map Controller Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Configuration & Default Coordinates (Campus Center)
+      const DEFAULT_CENTER = { lat: 40.7295, lng: -73.9965, name: 'Campus Center Plaza' };
+      let currentCenter = { ...DEFAULT_CENTER };
+      let currentRadius = 1200; // in meters
+      let loadedItems = [];
+      let markersMap = new Map(); // id -> marker instance
+
+      // DOM Elements
+      const mapSearchInput = document.getElementById('map-search-input');
+      const mapTypeFilter = document.getElementById('map-type-filter');
+      const mapCategoryFilter = document.getElementById('map-category-filter');
+      const mapRadiusSelect = document.getElementById('map-radius-select');
+      const mapLandmarkSelect = document.getElementById('map-landmark-select');
+      const btnLocateMe = document.getElementById('btn-locate-me');
+      const btnResetCenter = document.getElementById('btn-reset-center');
+      const itemsListContainer = document.getElementById('items-list-container');
+      const badgeTotalCount = document.getElementById('badge-total-count');
+      const statLostCount = document.getElementById('stat-lost-count');
+      const statFoundCount = document.getElementById('stat-found-count');
+      const statClosestDistance = document.getElementById('stat-closest-distance');
+      const labelSearchCenter = document.getElementById('label-search-center');
+      const mapCoordsDisplay = document.getElementById('map-coords-display');
+      const radiusIndicatorText = document.getElementById('radius-indicator-text');
+      const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
+      const mobileToggleText = document.getElementById('mobile-toggle-text');
+      const sidebarContainer = document.getElementById('sidebar-container');
+
+      // 1. Initialize Leaflet Map
+      const map = L.map('leaflet-map', {
+        center: [currentCenter.lat, currentCenter.lng],
+        zoom: 16,
+        zoomControl: true,
+      });
+
+      // 2. Add OpenStreetMap Tile Layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      }).addTo(map);
+
+      // 3. Initialize Marker Cluster Group
+      const markerClusterGroup = L.markerClusterGroup({
+        showCoverageOnHover: false,
+        maxClusterRadius: 40,
+        spiderfyOnMaxZoom: true,
+      });
+      map.addLayer(markerClusterGroup);
+
+      // 4. Center Target Marker (Draggable)
+      const centerIcon = L.divIcon({
+        className: 'custom-center-marker-wrapper',
+        html: `<div class="custom-marker marker-center w-8 h-8"><i class="fas fa-crosshairs text-sm"></i></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      let centerMarker = L.marker([currentCenter.lat, currentCenter.lng], {
+        icon: centerIcon,
+        draggable: true,
+        zIndexOffset: 1000,
+      }).addTo(map);
+
+      centerMarker.bindTooltip('Search Center (Drag or Click Map)', { direction: 'top', offset: [0, -16] });
+
+      // 5. Radius Boundary Circle
+      let radiusCircle = L.circle([currentCenter.lat, currentCenter.lng], {
+        radius: currentRadius,
+        color: '#4f46e5',
+        weight: 2,
+        dashArray: '6, 6',
+        fillColor: '#6366f1',
+        fillOpacity: 0.12,
+      }).addTo(map);
+
+      // Helper: Format distance
+      function formatDist(meters) {
+        if (meters === null || meters === undefined) return '';
+        if (meters < 1000) return `${meters} m away`;
+        return `${(meters / 1000).toFixed(1)} km away`;
+      }
+
+      // Helper: Custom SVG Leaflet Pin Icons
+      function createItemIcon(type) {
+        const isLost = type === 'lost';
+        const bgClass = isLost ? 'marker-lost' : 'marker-found';
+        const iconClass = isLost ? 'fa-exclamation' : 'fa-hand-holding-heart';
+        return L.divIcon({
+          className: 'custom-item-marker-wrapper',
+          html: `<div class="custom-marker ${bgClass} w-8 h-8"><i class="fas ${iconClass} text-xs"></i></div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+          popupAnchor: [0, -18],
+        });
+      }
+
+      // 6. Fetch Items from Backend Geo-Radius API
+      async function loadMapItems() {
+        itemsListContainer.innerHTML = `
+          <div class="p-8 text-center text-slate-400">
+            <i class="fas fa-spinner fa-spin text-2xl text-indigo-500 mb-2"></i>
+            <p class="text-xs font-medium">Scanning radius for items...</p>
+          </div>
+        `;
+
+        try {
+          const params = {
+            lat: currentCenter.lat,
+            lng: currentCenter.lng,
+            radius: currentRadius === 'all' ? 'all' : currentRadius,
+            type: mapTypeFilter.value,
+            category: mapCategoryFilter.value,
+            q: mapSearchInput.value.trim(),
+          };
+
+          const response = await API.items.getMapItems(params);
+
+          if (response && response.success) {
+            loadedItems = response.data || [];
+            updateUI(response);
+          } else {
+            throw new Error(response.message || 'Failed to load map data');
+          }
+        } catch (err) {
+          console.error('[Map Explorer Error]', err);
+          itemsListContainer.innerHTML = `
+            <div class="p-6 text-center text-rose-500">
+              <i class="fas fa-exclamation-triangle text-xl mb-2"></i>
+              <p class="text-xs font-bold">${err.message || 'Error connecting to map service'}</p>
+              <button onclick="loadMapItems()" class="mt-3 px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold">Retry</button>
+            </div>
+          `;
+        }
+      }
+
+      // 7. Update Map Markers & Sidebar List
+      function updateUI(response) {
+        const items = response.data || [];
+        const counts = response.counts || { total: 0, lost: 0, found: 0 };
+
+        // Update stats
+        badgeTotalCount.textContent = counts.total;
+        statLostCount.textContent = counts.lost;
+        statFoundCount.textContent = counts.found;
+        statClosestDistance.textContent = items.length > 0 ? items[0].distanceText.replace(' away', '') : '--';
+        labelSearchCenter.textContent = `Centered: ${currentCenter.name || `${currentCenter.lat.toFixed(4)}, ${currentCenter.lng.toFixed(4)}`}`;
+        mapCoordsDisplay.textContent = `${currentCenter.lat.toFixed(4)}, ${currentCenter.lng.toFixed(4)}`;
+        radiusIndicatorText.textContent = currentRadius === 'all' ? 'Radius: All' : `Radius: ${currentRadius >= 1000 ? (currentRadius / 1000).toFixed(1) + ' km' : currentRadius + ' m'}`;
+
+        // Clear existing markers
+        markerClusterGroup.clearLayers();
+        markersMap.clear();
+
+        if (items.length === 0) {
+          itemsListContainer.innerHTML = `
+            <div class="p-8 text-center text-slate-400">
+              <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                <i class="fas fa-map-pin text-lg"></i>
+              </div>
+              <p class="text-xs font-bold text-slate-600">No items found within this radius</p>
+              <p class="text-[11px] text-slate-400 mt-1">Try expanding the radius slider or changing category filters.</p>
+              <button id="btn-expand-radius" class="mt-3 px-3.5 py-1.5 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-bold hover:bg-indigo-100 transition-colors">
+                Expand to 5.0 km
+              </button>
+            </div>
+          `;
+          const btnExpand = document.getElementById('btn-expand-radius');
+          if (btnExpand) {
+            btnExpand.addEventListener('click', () => {
+              mapRadiusSelect.value = '5000';
+              currentRadius = 5000;
+              updateRadiusCircle();
+              loadMapItems();
+            });
+          }
+          return;
+        }
+
+        // Render List & Add Map Markers
+        itemsListContainer.innerHTML = '';
+
+        items.forEach((item) => {
+          const isLost = item.type === 'lost';
+          const coords = item.coordinates || { lat: currentCenter.lat, lng: currentCenter.lng };
+
+          // Build Popup Content
+          const popupHtml = `
+            <div class="w-64 bg-white rounded-2xl overflow-hidden font-sans">
+              <div class="relative h-28 bg-slate-100 overflow-hidden">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=400&q=80'}" alt="${item.title}" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm ${isLost ? 'bg-rose-500' : 'bg-emerald-500'}">
+                  ${isLost ? 'Lost Property' : 'Found Belonging'}
+                </span>
+                <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-white">
+                  📍 ${item.distanceText}
+                </span>
+              </div>
+              <div class="p-3">
+                <div class="flex items-center gap-1.5 mb-1">
+                  <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold">${item.category}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${new Date(item.date).toLocaleDateString()}</span>
+                </div>
+                <h4 class="font-bold text-slate-800 text-xs line-clamp-1 mb-1">${item.title}</h4>
+                <p class="text-[11px] text-slate-500 line-clamp-2 mb-3">${item.description}</p>
+                <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+                  <a href="item-details.html?id=${item._id}&type=${item.type}" class="flex-1 py-1.5 text-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-colors">
+                    View Details
+                  </a>
+                  ${!isLost ? `
+                    <a href="item-details.html?id=${item._id}&type=found#claim-section" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold rounded-xl transition-colors">
+                      Claim
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Create Marker
+          const marker = L.marker([coords.lat, coords.lng], {
+            icon: createItemIcon(item.type),
+            title: item.title,
+          });
+
+          marker.bindPopup(popupHtml, { maxWidth: 280, closeButton: false });
+          markerClusterGroup.addLayer(marker);
+          markersMap.set(item._id, marker);
+
+          // Build Sidebar Card
+          const card = document.createElement('div');
+          card.className = `p-3 rounded-2xl border transition-all cursor-pointer hover:shadow-md ${
+            isLost ? 'border-slate-100 hover:border-rose-300 bg-white' : 'border-slate-100 hover:border-emerald-300 bg-white'
+          }`;
+          card.innerHTML = `
+            <div class="flex items-start gap-3">
+              <img src="${item.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=200&q=80'}" alt="${item.title}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0 bg-slate-100">
+              <div class="flex-grow min-w-0">
+                <div class="flex items-center justify-between gap-1 mb-1">
+                  <span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                    isLost ? 'bg-rose-50 text-rose-600' : 'bg-emerald-50 text-emerald-600'
+                  }">
+                    <span class="w-1.5 h-1.5 rounded-full ${isLost ? 'bg-rose-500' : 'bg-emerald-500'}"></span>
+                    ${isLost ? 'Lost' : 'Found'}
+                  </span>
+                  <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50/80 px-2 py-0.5 rounded-full">
+                    ${item.distanceText}
+                  </span>
+                </div>
+                <h4 class="text-xs font-bold text-slate-800 truncate">${item.title}</h4>
+                <p class="text-[11px] text-slate-400 truncate flex items-center gap-1 mt-0.5">
+                  <i class="fas fa-map-marker-alt text-slate-300 text-[10px]"></i> ${item.location}
+                </p>
+                <div class="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-50 text-[10px]">
+                  <span class="font-semibold text-slate-500">${item.category}</span>
+                  <span class="font-bold text-indigo-600 hover:underline">Focus on Map &rarr;</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+          // Card Click: Focus and zoom to marker
+          card.addEventListener('click', () => {
+            map.flyTo([coords.lat, coords.lng], 18, { duration: 1 });
+            setTimeout(() => {
+              markerClusterGroup.zoomToShowLayer(marker, () => {
+                marker.openPopup();
+              });
+            }, 600);
+
+            // On mobile, automatically show map when card clicked
+            if (window.innerWidth < 768) {
+              sidebarContainer.classList.add('hidden');
+              mobileToggleText.textContent = 'Show List';
+            }
+          });
+
+          itemsListContainer.appendChild(card);
+        });
+      }
+
+      // 8. Update Center & Radius Visuals
+      function updateCenterLocation(lat, lng, name = '') {
+        currentCenter.lat = parseFloat(lat);
+        currentCenter.lng = parseFloat(lng);
+        currentCenter.name = name;
+
+        centerMarker.setLatLng([currentCenter.lat, currentCenter.lng]);
+        updateRadiusCircle();
+        loadMapItems();
+      }
+
+      function updateRadiusCircle() {
+        if (currentRadius === 'all') {
+          radiusCircle.setStyle({ opacity: 0, fillOpacity: 0 });
+        } else {
+          radiusCircle.setLatLng([currentCenter.lat, currentCenter.lng]);
+          radiusCircle.setRadius(currentRadius);
+          radiusCircle.setStyle({ opacity: 1, fillOpacity: 0.12 });
+        }
+      }
+
+      // 9. Interactive Map Clicks & Center Dragging
+      map.on('click', (e) => {
+        updateCenterLocation(e.latlng.lat, e.latlng.lng, 'Selected Map Location');
+      });
+
+      centerMarker.on('dragend', (e) => {
+        const pos = centerMarker.getLatLng();
+        updateCenterLocation(pos.lat, pos.lng, 'Custom Dragged Center');
+      });
+
+      // 10. Filter Change Listeners
+      mapRadiusSelect.addEventListener('change', (e) => {
+        currentRadius = e.target.value === 'all' ? 'all' : parseFloat(e.target.value);
+        updateRadiusCircle();
+        loadMapItems();
+      });
+
+      mapTypeFilter.addEventListener('change', loadMapItems);
+      mapCategoryFilter.addEventListener('change', loadMapItems);
+
+      let searchTimeout;
+      mapSearchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(loadMapItems, 350);
+      });
+
+      // 11. Landmark Quick Picker
+      const LANDMARK_COORDS = {
+        center: { lat: 40.7295, lng: -73.9965, name: 'Campus Center Plaza' },
+        library: { lat: 40.7298, lng: -73.9972, name: 'Main Campus Library' },
+        union: { lat: 40.7305, lng: -73.9958, name: 'Student Union Complex' },
+        science: { lat: 40.7312, lng: -73.9980, name: 'Science & Engineering Hall' },
+        lounge: { lat: 40.7289, lng: -73.9960, name: 'Student Activity Lounge' },
+        parking: { lat: 40.7278, lng: -73.9995, name: 'West Parking Facility Section B' },
+        quad: { lat: 40.7320, lng: -73.9945, name: 'Engineering Quad Plaza' },
+        gym: { lat: 40.7265, lng: -73.9940, name: 'Athletics & Recreation Center' },
+        security: { lat: 40.7291, lng: -73.9968, name: 'Campus Security Desk (Room 104)' },
+        health: { lat: 40.7340, lng: -73.9990, name: 'Health & Wellness Center' },
+      };
+
+      mapLandmarkSelect.addEventListener('change', (e) => {
+        const key = e.target.value;
+        if (key && LANDMARK_COORDS[key]) {
+          const lm = LANDMARK_COORDS[key];
+          map.flyTo([lm.lat, lm.lng], 17, { duration: 1.2 });
+          updateCenterLocation(lm.lat, lm.lng, lm.name);
+        }
+      });
+
+      // 12. GPS "Locate Me" Button
+      btnLocateMe.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert('Geolocation is not supported by your browser.');
+          return;
+        }
+
+        btnLocateMe.innerHTML = `<i class="fas fa-spinner fa-spin text-indigo-400"></i> Locating...`;
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            btnLocateMe.innerHTML = `<i class="fas fa-crosshairs text-indigo-400"></i> Locate Me`;
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            map.flyTo([lat, lng], 17, { duration: 1.2 });
+            updateCenterLocation(lat, lng, 'My GPS Location');
+          },
+          (err) => {
+            btnLocateMe.innerHTML = `<i class="fas fa-crosshairs text-indigo-400"></i> Locate Me`;
+            console.warn('Geolocation error or permission denied, using default campus center.', err);
+            alert('Could not retrieve your location. Resetting to Campus Center.');
+            updateCenterLocation(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_CENTER.name);
+          },
+          { enableHighAccuracy: true, timeout: 6000 }
+        );
+      });
+
+      // 13. Reset Center Button
+      btnResetCenter.addEventListener('click', () => {
+        map.flyTo([DEFAULT_CENTER.lat, DEFAULT_CENTER.lng], 16, { duration: 1 });
+        mapLandmarkSelect.value = 'center';
+        updateCenterLocation(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng, DEFAULT_CENTER.name);
+      });
+
+      // 14. Mobile Split-Screen Toggle
+      mobileToggleBtn.addEventListener('click', () => {
+        const isHidden = sidebarContainer.classList.contains('hidden');
+        if (isHidden) {
+          sidebarContainer.classList.remove('hidden');
+          mobileToggleText.textContent = 'Show Map';
+        } else {
+          sidebarContainer.classList.add('hidden');
+          mobileToggleText.textContent = 'Show List';
+          map.invalidateSize();
+        }
+      });
+
+      // Initial Load & Map Size Invalidation
+      loadMapItems();
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 300);
+      window.addEventListener('resize', () => {
+        map.invalidateSize();
+      });
+    });
+  </script>
+</body>
+</html>

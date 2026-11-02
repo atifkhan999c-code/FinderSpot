@@ -1,0 +1,27 @@
+/* Form Specific Styles */
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  transition: all 0.2s ease-in-out;
+}
+
+.dropzone:hover, .dropzone.drag-active {
+  border-color: #6366f1;
+  background-color: #f8fafc;
+}
+
+.form-input-focus:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.form-error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.form-error-msg {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  font-weight: 600;
+}

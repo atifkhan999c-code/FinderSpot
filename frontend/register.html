@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create an Account | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+  <!-- Top Simple Header -->
+  <header class="py-6 px-4 sm:px-8 max-w-7xl mx-auto w-full flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200">
+        <i class="fas fa-search-location text-lg"></i>
+      </div>
+      <div>
+        <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+        <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+      </div>
+    </a>
+    <a href="login.html" class="text-sm font-semibold text-slate-500 hover:text-indigo-600 flex items-center gap-1.5 transition-colors">
+      Already registered? <span class="text-indigo-600 font-bold underline">Sign In</span>
+    </a>
+  </header>
+
+  <!-- Register Main Container -->
+  <main class="flex-grow flex items-center justify-center px-4 py-8">
+    <div class="w-full max-w-xl bg-white rounded-3xl shadow-xl shadow-slate-200/80 border border-slate-100 p-8 sm:p-10 relative overflow-hidden">
+      
+      <!-- Top Decorative Accent -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-400 via-indigo-500 to-purple-600"></div>
+
+      <div class="text-center mb-8">
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Create Your Account</h1>
+        <p class="text-sm text-slate-500 mt-2">Join our campus community to report, recover, and safeguard items</p>
+      </div>
+
+      <!-- Registration Form -->
+      <form id="register-form" class="space-y-4">
+        
+        <!-- Full Name -->
+        <div>
+          <label for="reg-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Full Name</label>
+          <div class="relative">
+            <i class="far fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+            <input type="text" id="reg-name" required placeholder="Alex" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+        </div>
+
+        <!-- Grid for Email & Phone -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Email -->
+          <div>
+            <label for="reg-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Campus / Personal Email</label>
+            <div class="relative">
+              <i class="far fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="email" id="reg-email" required placeholder="alex@campus.edu" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <!-- Phone Number -->
+          <div>
+            <label for="reg-phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Phone Number</label>
+            <div class="relative">
+              <i class="fas fa-phone-alt absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="tel" id="reg-phone" required placeholder="+1 (555) 012-3456" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+          </div>
+        </div>
+
+        <!-- Role & Student/Staff ID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Account Role -->
+          <div>
+            <label for="reg-role" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">User Role</label>
+            <select id="reg-role" class="w-full px-3 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <option value="Student">Student</option>
+              <option value="Faculty">Faculty / Professor</option>
+              <option value="Staff">University Staff</option>
+              <option value="Security">Campus Security</option>
+              <option value="General Public">General Public / Visitor</option>
+            </select>
+          </div>
+
+          <!-- Student/Staff ID -->
+          <div>
+            <label for="reg-id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Campus ID (Optional)</label>
+            <div class="relative">
+              <i class="far fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" id="reg-id" placeholder="STU-98421" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            </div>
+          </div>
+        </div>
+
+        <!-- Passwords -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="reg-password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Password</label>
+            <input type="password" id="reg-password" required placeholder="Min. 8 characters" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+          <div>
+            <label for="reg-confirm-password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Confirm Password</label>
+            <input type="password" id="reg-confirm-password" required placeholder="Re-type password" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+        </div>
+
+        <!-- Terms Agreement Checkbox -->
+        <div class="pt-2">
+          <label class="flex items-start gap-2.5 cursor-pointer">
+            <input type="checkbox" required class="mt-0.5 w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
+            <span class="text-xs text-slate-600 leading-normal">
+              I agree to the <a href="#" class="text-indigo-600 underline font-semibold">Terms of Service</a>, <a href="#" class="text-indigo-600 underline font-semibold">Community Guidelines</a>, and confirm that all reported listings will be accurate and truthful.
+            </span>
+          </label>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-200 hover:shadow-xl transition-all flex items-center justify-center gap-2 mt-4">
+          <i class="fas fa-user-plus text-xs"></i>
+          <span>Create Account & Continue</span>
+        </button>
+
+      </form>
+
+      <!-- Already have account -->
+      <div class="mt-6 text-center text-sm text-slate-600 pt-4 border-t border-slate-100">
+        Already have an active account? 
+        <a href="login.html" class="font-bold text-indigo-600 hover:text-indigo-700 transition-colors">Sign In</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Simple Footer -->
+  <footer class="py-4 text-center text-xs text-slate-400 border-t border-slate-200">
+    &copy; 2026 FinderSpot Platform. Protecting personal information with campus safety protocols.
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById('register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('reg-name').value;
+      const email = document.getElementById('reg-email').value;
+      const phone = document.getElementById('reg-phone').value;
+      const role = document.getElementById('reg-role').value;
+      const pwd = document.getElementById('reg-password').value;
+      const confirmPwd = document.getElementById('reg-confirm-password').value;
+
+      if (pwd !== confirmPwd) {
+        alert('Passwords do not match. Please verify your passwords.');
+        return;
+      }
+
+      if (typeof LFApp !== 'undefined') {
+        LFApp.saveCurrentUser({
+          name: name,
+          email: email,
+          phone: phone,
+          role: role
+        });
+        LFApp.showToast(`Account successfully created for ${name}!`, 'success');
+      }
+
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 800);
+    });
+  </script>
+</body>
+</html>

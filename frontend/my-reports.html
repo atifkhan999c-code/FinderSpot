@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Reports | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="dashboard.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Dashboard</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="my-reports.html" class="px-3.5 py-2 rounded-lg text-sm font-semibold text-indigo-600 bg-indigo-50 transition-colors">My Reports</a>
+          <a href="report-lost.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+        </nav>
+
+        <!-- Right Action Items -->
+        <div class="hidden md:flex items-center gap-3">
+          <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> User Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Home</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Dashboard</a>
+      <a href="browse-items.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Browse Items</a>
+      <a href="my-reports.html" class="block px-3 py-2 rounded-lg text-base font-semibold text-indigo-600 bg-indigo-50">My Reports</a>
+      <a href="report-lost.html" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600">Report Lost</a>
+      <a href="report-found.html" class="block px-3 py-2 rounded-lg text-base font-medium text-emerald-600">Report Found</a>
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+    
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">My Reports & Submissions</h1>
+        <p class="text-slate-500 text-sm mt-1">Manage items you reported lost, items you discovered, and respond to ownership claims.</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="report-lost.html" class="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-1.5">
+          <i class="fas fa-plus"></i> Report Lost
+        </a>
+        <a href="report-found.html" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md transition-all flex items-center gap-1.5">
+          <i class="fas fa-plus"></i> Report Found
+        </a>
+      </div>
+    </div>
+
+    <!-- Tabs Container -->
+    <div class="border-b border-slate-200 mb-8">
+      <div class="flex space-x-8" id="reports-tabs">
+        
+        <button data-tab="lost" class="tab-btn active pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+          <span>Items I Lost</span>
+          <span id="lost-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-700">2</span>
+        </button>
+
+        <button data-tab="found" class="tab-btn pb-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <span>Items I Found</span>
+          <span id="found-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600">1</span>
+        </button>
+
+        <button data-tab="claims" class="tab-btn pb-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <span>Claims & Inquiries</span>
+          <span id="claims-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">1</span>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Tab Panels -->
+
+    <!-- PANEL 1: ITEMS I LOST -->
+    <div id="panel-lost" class="tab-panel space-y-4">
+      <div id="lost-items-list" class="space-y-4">
+        <!-- Dynamically Rendered -->
+      </div>
+    </div>
+
+    <!-- PANEL 2: ITEMS I FOUND -->
+    <div id="panel-found" class="tab-panel hidden space-y-4">
+      <div id="found-items-list" class="space-y-4">
+        <!-- Dynamically Rendered -->
+      </div>
+    </div>
+
+    <!-- PANEL 3: CLAIMS & INQUIRIES -->
+    <div id="panel-claims" class="tab-panel hidden space-y-4">
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
+        <h3 class="text-base font-bold text-slate-900 mb-2">Claim Requests for Items You Found</h3>
+        <p class="text-xs text-slate-500 mb-6">Review answers submitted by claimants to verify legitimate ownership before returning the item.</p>
+
+        <div class="space-y-4" id="claims-list-container">
+          
+          <!-- Sample Claim Item -->
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1.5">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">PENDING VERIFICATION</span>
+                <span class="text-xs text-slate-400">Claim for <strong>#LF-1006 (Keys with Subaru Fob)</strong></span>
+              </div>
+              <h4 class="font-bold text-slate-800 text-sm">Claimant: Marcus Cole</h4>
+              <p class="text-xs text-slate-600 mt-1"><strong>Submitted Proof / Answer:</strong> "The bottle opener keychain has an engraved mountain logo and says 'REI Co-op'. The key has a slight scratch near the top ring."</p>
+              <div class="mt-2 text-xs text-slate-500 flex items-center gap-4">
+                <span><i class="fas fa-phone-alt mr-1 text-slate-400"></i> +1 (555) 789-0123</span>
+                <span><i class="far fa-clock mr-1 text-slate-400"></i> Today, 12:30 PM</span>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 self-end md:self-center">
+              <button onclick="acceptClaim('LF-1006')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                <i class="fas fa-check mr-1"></i> Approve & Reunited
+              </button>
+              <button onclick="LFApp.showToast('Claim inquiry declined.', 'warning'); this.closest('.p-5').remove();" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-colors">
+                Decline
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>&copy; 2026 FinderSpot Platform. Community Lost & Found Network.</p>
+      <div class="flex items-center gap-4">
+        <a href="contact.html" class="hover:text-indigo-600">Help Desk</a>
+        <a href="dashboard.html" class="hover:text-indigo-600">Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Tab Switching Logic
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const panels = document.querySelectorAll('.tab-panel');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => {
+          b.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
+          b.classList.add('border-transparent', 'text-slate-500');
+        });
+        btn.classList.add('active', 'border-indigo-600', 'text-indigo-600');
+        btn.classList.remove('border-transparent', 'text-slate-500');
+
+        const target = btn.dataset.tab;
+        panels.forEach(p => p.classList.add('hidden'));
+        document.getElementById(`panel-${target}`).classList.remove('hidden');
+      });
+    });
+
+    // Render User's Reports
+    function renderMyReports() {
+      if (typeof LFApp === 'undefined') return;
+      const allItems = LFApp.getItems();
+      
+      // Filter items marked as user report
+      const lostItems = allItems.filter(i => i.type === 'lost' && (i.isUserReport || i.reporterName === 'Alex'));
+      const foundItems = allItems.filter(i => i.type === 'found' && (i.isUserReport || i.reporterName === 'Alex'));
+
+      document.getElementById('lost-count-badge').textContent = lostItems.length;
+      document.getElementById('found-count-badge').textContent = foundItems.length;
+
+      const lostList = document.getElementById('lost-items-list');
+      const foundList = document.getElementById('found-items-list');
+
+      // Render Lost List
+      if (lostItems.length === 0) {
+        lostList.innerHTML = `<div class="p-8 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400">You haven't reported any lost items.</div>`;
+      } else {
+        lostList.innerHTML = lostItems.map(item => createReportItemCard(item)).join('');
+      }
+
+      // Render Found List
+      if (foundItems.length === 0) {
+        foundList.innerHTML = `<div class="p-8 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400">You haven't reported any found items.</div>`;
+      } else {
+        foundList.innerHTML = foundItems.map(item => createReportItemCard(item)).join('');
+      }
+    }
+
+    function createReportItemCard(item) {
+      const isReturned = item.status === 'returned';
+      return `
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all">
+          <div class="flex items-center gap-4">
+            <img src="${item.image}" alt="${item.title}" class="w-20 h-20 rounded-2xl object-cover border border-slate-200 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80'">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                  ${item.type.toUpperCase()}
+                </span>
+                <span class="text-xs font-bold text-slate-400">#${item.id}</span>
+                ${isReturned ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-white">REUNITED / RESOLVED</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">Active</span>'}
+              </div>
+              <h3 class="text-base font-bold text-slate-900">${item.title}</h3>
+              <p class="text-xs text-slate-500 mt-1">
+                <i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${item.location} • Reported ${item.date}
+              </p>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 self-end md:self-center">
+            <a href="item-details.html?id=${item.id}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+              View
+            </a>
+            ${!isReturned ? `
+              <button onclick="markAsResolved('${item.id}')" class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-colors flex items-center gap-1.5">
+                <i class="fas fa-check"></i> Mark Reunited
+              </button>
+            ` : ''}
+            <button onclick="deleteReport('${item.id}')" class="px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors" title="Delete Report">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function markAsResolved(id) {
+      if (confirm('Mark this item as successfully reunited / resolved?')) {
+        LFApp.updateItem(id, { status: 'returned' });
+        LFApp.showToast('Item marked as safely reunited! Congratulations!', 'success');
+        renderMyReports();
+      }
+    }
+
+    function deleteReport(id) {
+      if (confirm('Are you sure you want to remove this report?')) {
+        LFApp.deleteItem(id);
+        LFApp.showToast('Report deleted successfully.', 'info');
+        renderMyReports();
+      }
+    }
+
+    function acceptClaim(itemId) {
+      LFApp.updateItem(itemId, { status: 'returned' });
+      LFApp.showToast('Claim approved! Item marked as returned.', 'success');
+      document.getElementById('claims-list-container').innerHTML = `
+        <div class="p-6 text-center text-xs text-emerald-600 bg-emerald-50 rounded-2xl border border-emerald-200">
+          <i class="fas fa-check-circle text-lg mb-2"></i>
+          <p class="font-bold">Claim successfully accepted and recorded.</p>
+        </div>
+      `;
+      renderMyReports();
+    }
+
+    document.addEventListener('DOMContentLoaded', renderMyReports);
+  </script>
+</body>
+</html>

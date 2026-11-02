@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin & Moderation Panel | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body class="bg-slate-100 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Admin Top Bar -->
+  <header class="sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <div class="flex items-center gap-4">
+          <a href="index.html" class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <div>
+              <span class="text-lg font-extrabold text-white">FinderSpot <span class="text-indigo-400">Admin</span></span>
+              <span class="block text-[10px] font-semibold text-slate-400 uppercase -mt-1">Campus Moderation Desk</span>
+            </div>
+          </a>
+          <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            ROOM 104 SECURITY CUSTODY
+          </span>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <a href="dashboard.html" class="text-xs font-semibold text-slate-400 hover:text-white transition-colors">
+            <i class="fas fa-home mr-1"></i> User Portal
+          </a>
+          <div class="flex items-center gap-2 pl-3 border-l border-slate-800">
+            <img class="w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" alt="Officer">
+            <span class="text-xs font-bold text-slate-200">Officer David Vance</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Admin Dashboard Container -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <!-- KPI Analytics Cards (Live Synced with Database) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+      
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <p class="text-xs font-bold text-slate-400 uppercase">Registered Users</p>
+        <p id="kpi-users" class="text-2xl font-extrabold text-slate-900 mt-1">--</p>
+        <span class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-users mr-1"></i> Verified Campus IDs</span>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <p class="text-xs font-bold text-slate-400 uppercase">Active Lost Reports</p>
+        <p id="kpi-lost" class="text-2xl font-extrabold text-rose-600 mt-1">--</p>
+        <span class="text-[10px] text-slate-500">Awaiting Discovery</span>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <p class="text-xs font-bold text-slate-400 uppercase">Vault Custody Items</p>
+        <p id="kpi-vault" class="text-2xl font-extrabold text-emerald-600 mt-1">--</p>
+        <span class="text-[10px] text-slate-500">Room 104 Lockers</span>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <p class="text-xs font-bold text-slate-400 uppercase">Pending Claims</p>
+        <p id="kpi-claims" class="text-2xl font-extrabold text-amber-600 mt-1">--</p>
+        <span class="text-[10px] text-amber-600 font-bold">Verification Needed</span>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <p class="text-xs font-bold text-slate-400 uppercase">Recovery Rate</p>
+        <p id="kpi-recovery" class="text-2xl font-extrabold text-indigo-600 mt-1">--</p>
+        <span class="text-[10px] text-emerald-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Handed Over</span>
+      </div>
+
+    </div>
+
+    <!-- Analytics Hotspots & Categories Bar -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Property Category Distribution</h3>
+          <span class="text-xs text-indigo-600 font-semibold">Live Analytics</span>
+        </div>
+        <div id="analytics-category-bars" class="space-y-3">
+          <div class="text-xs text-slate-400 italic">Loading category analytics...</div>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Top Campus Hotspots</h3>
+          <div id="analytics-hotspots-list" class="space-y-2.5">
+            <div class="text-xs text-slate-400 italic">Analyzing incident hotspots...</div>
+          </div>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <span>Security Protocol:</span>
+          <span class="font-bold text-indigo-600">Standard Desk 104 Handover</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-8">
+      <div class="border-b border-slate-200 px-6 pt-4 flex space-x-6 overflow-x-auto" id="admin-tabs">
+        <button class="admin-tab active pb-4 text-xs font-bold uppercase tracking-wider border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2" data-target="items-panel">
+          <i class="fas fa-boxes"></i> Item Inventory
+        </button>
+        <button class="admin-tab pb-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2" data-target="claims-panel">
+          <i class="fas fa-shield-alt"></i> Claims Queue
+          <span id="tab-claims-badge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-amber-100 text-amber-800 font-extrabold">0</span>
+        </button>
+        <button class="admin-tab pb-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2" data-target="audit-panel">
+          <i class="fas fa-clipboard-check"></i> Audit & Compliance Trail
+          <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-emerald-100 text-emerald-800 font-extrabold">LIVE</span>
+        </button>
+        <button class="admin-tab pb-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2" data-target="users-panel">
+          <i class="fas fa-users"></i> Users & Trust Scores
+        </button>
+        <button class="admin-tab pb-4 text-xs font-bold uppercase tracking-wider border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2" data-target="vault-panel">
+          <i class="fas fa-lock"></i> Vault Lockers (Room 104)
+        </button>
+      </div>
+
+      <!-- TAB 1: ITEM INVENTORY & MODERATION -->
+      <div id="items-panel" class="admin-panel p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div class="relative flex-grow max-w-md">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="admin-search-items" placeholder="Search by title, location, category..." class="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="admin-filter-type" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+              <option value="all">All Types</option>
+              <option value="lost">Lost Only</option>
+              <option value="found">Found Only</option>
+            </select>
+            <select id="admin-filter-status" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="returned">Returned / Handed Over</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Item Details</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4">Category</th>
+                <th class="py-3 px-4">Location</th>
+                <th class="py-3 px-4">Date</th>
+                <th class="py-3 px-4">Status</th>
+                <th class="py-3 px-4 text-right">Moderation Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-items-tbody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated via API -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 2: CLAIMS QUEUE (Interactive Decision Modal) -->
+      <div id="claims-panel" class="admin-panel hidden p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Ownership Claim Verification Queue</h3>
+            <p class="text-xs text-slate-500">Review answers to confidential challenge questions and approve physical handover.</p>
+          </div>
+          <button onclick="loadAdminClaims()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+            <i class="fas fa-sync-alt mr-1"></i> Refresh Queue
+          </button>
+        </div>
+
+        <div class="space-y-4" id="admin-claims-list">
+          <!-- Dynamically populated via API -->
+        </div>
+      </div>
+
+      <!-- TAB 3: AUDIT & COMPLIANCE TRAIL (NEW AUDIT LOG SYSTEM) -->
+      <div id="audit-panel" class="admin-panel hidden p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Administrative Audit Trail & Verification Logs</h3>
+            <p class="text-xs text-slate-500">Immutable chronological record of claim approvals, returns, role changes, and custodial actions.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="audit-action-filter" class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700">
+              <option value="">All Actions</option>
+              <option value="CLAIM_APPROVED">Claim Approvals</option>
+              <option value="CLAIM_REJECTED">Claim Rejections</option>
+              <option value="USER_ROLE_UPDATED">Role Changes</option>
+              <option value="VAULT_INTAKE">Vault Intakes</option>
+              <option value="ITEM_DELETED">Item Deletions</option>
+            </select>
+            <button onclick="loadAuditLogs()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold">
+              <i class="fas fa-sync-alt mr-1"></i> Refresh Trail
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">Action</th>
+                <th class="py-3 px-4">Officer / Performer</th>
+                <th class="py-3 px-4">Details & Notes</th>
+                <th class="py-3 px-4">Target Entity</th>
+                <th class="py-3 px-4">IP Address</th>
+                <th class="py-3 px-4 text-right">Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="admin-audit-tbody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated via API -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4: USERS & TRUST DIRECTORY -->
+      <div id="users-panel" class="admin-panel hidden p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">User Accounts & Trust Directory</h3>
+            <p class="text-xs text-slate-500">Manage user authorization roles and honesty trust points.</p>
+          </div>
+          <button onclick="loadAdminUsers()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold">
+            <i class="fas fa-sync-alt mr-1"></i> Refresh Users
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-400 font-bold uppercase tracking-wider">
+                <th class="py-3 px-4">User</th>
+                <th class="py-3 px-4">Email Address</th>
+                <th class="py-3 px-4">Role Badge</th>
+                <th class="py-3 px-4">Campus Department</th>
+                <th class="py-3 px-4">Trust Points</th>
+                <th class="py-3 px-4 text-right">Permissions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-tbody" class="divide-y divide-slate-100">
+              <!-- Dynamically populated via API -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 5: VAULT LOCKERS (ROOM 104) -->
+      <div id="vault-panel" class="admin-panel hidden p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Security Vault Custody (Room 104 Lockers)</h3>
+            <p class="text-xs text-slate-500">Physical custody verification of high-value items turned over to campus police.</p>
+          </div>
+          <button onclick="openCustodyModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5">
+            <i class="fas fa-plus"></i> Log Custody Intake
+          </button>
+        </div>
+
+        <div id="vault-lockers-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Dynamically populated via API -->
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- CLAIM APPROVAL MODAL -->
+  <div id="approve-claim-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Approve Ownership & Handover</h3>
+        </div>
+        <button onclick="closeApproveClaimModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="approve-claim-form" class="mt-4 space-y-4">
+        <input type="hidden" id="modal-claim-id">
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+          <span class="font-bold text-slate-500 uppercase text-[10px]">Claimant Proof:</span>
+          <p id="modal-claim-proof" class="italic text-slate-700 mt-0.5">"..."</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Assigned Custody / Pickup Locker <span class="text-rose-500">*</span></label>
+          <input type="text" id="modal-pickup-locker" value="Locker A-01 (Security Desk Room 104)" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Officer Handover Verification Notes</label>
+          <textarea id="modal-reviewer-notes" rows="2" placeholder="e.g. Verified student photo ID, serial number match confirmed..." class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeApproveClaimModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-slate-200">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-200">
+            Confirm Handover & Log Audit Trail
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT USER ROLE MODAL -->
+  <div id="edit-user-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Edit User Permissions</h3>
+        <button onclick="closeEditUserModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="edit-user-form" class="mt-4 space-y-4">
+        <input type="hidden" id="edit-user-id">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">User Name</label>
+          <input type="text" id="edit-user-name" disabled class="w-full px-3.5 py-2 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-500 font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Authorization Role</label>
+          <select id="edit-user-role" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+            <option value="Student">Student</option>
+            <option value="Staff">Faculty / Staff</option>
+            <option value="Security">Campus Security</option>
+            <option value="Admin">Administrator</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Trust Points</label>
+          <input type="number" id="edit-user-points" class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-emerald-600">
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-slate-200">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200">
+            Save Permissions & Log
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- LOG CUSTODY INTAKE MODAL -->
+  <div id="custody-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in duration-200">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <h3 class="text-base font-bold text-slate-900">Log Physical Custody Intake</h3>
+        <button onclick="closeCustodyModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="custody-form" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Select Found Item to Store</label>
+          <select id="custody-item-id" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-800">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Locker Number (Room 104)</label>
+          <input type="text" id="custody-locker-no" placeholder="e.g. Locker A-02" required class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Intake Notes</label>
+          <textarea id="custody-notes" rows="2" placeholder="Item placed in tamper-evident bag by Officer Vance..." class="w-full px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs"></textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button type="button" onclick="closeCustodyModal()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-600 font-bold text-xs hover:bg-slate-200">Cancel</button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-200">
+            Confirm Intake & Record Audit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Tab switching
+    const tabs = document.querySelectorAll('.admin-tab');
+    const panels = document.querySelectorAll('.admin-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
+          t.classList.add('border-transparent', 'text-slate-500');
+        });
+        tab.classList.add('active', 'border-indigo-600', 'text-indigo-600');
+        tab.classList.remove('border-transparent', 'text-slate-500');
+
+        const target = tab.dataset.target;
+        panels.forEach(p => p.classList.add('hidden'));
+        document.getElementById(target).classList.remove('hidden');
+      });
+    });
+
+    let currentItems = [];
+
+    // 1. Load Live Stats & Analytics
+    async function loadAdminKPIs() {
+      try {
+        const [statsRes, analyticsRes] = await Promise.all([
+          API.admin.getStats(),
+          API.admin.getAnalytics()
+        ]);
+
+        if (statsRes && statsRes.data) {
+          const s = statsRes.data;
+          document.getElementById('kpi-users').textContent = s.totalUsers || '0';
+          document.getElementById('kpi-lost').textContent = s.activeLost || '0';
+          document.getElementById('kpi-vault').textContent = s.vaultCount || '0';
+          document.getElementById('kpi-claims').textContent = s.pendingClaims || '0';
+          document.getElementById('kpi-recovery').textContent = s.recoveryRate || '0%';
+          document.getElementById('tab-claims-badge').textContent = s.pendingClaims || '0';
+        }
+
+        if (analyticsRes && analyticsRes.data) {
+          const a = analyticsRes.data;
+          // Render Category distribution
+          const catContainer = document.getElementById('analytics-category-bars');
+          if (catContainer && a.categoryBreakdown.length > 0) {
+            const max = Math.max(...a.categoryBreakdown.map(c => c.count), 1);
+            catContainer.innerHTML = a.categoryBreakdown.map(c => {
+              const pct = Math.round((c.count / max) * 100);
+              return `
+                <div>
+                  <div class="flex justify-between text-xs font-semibold mb-1">
+                    <span class="text-slate-700">${c.category}</span>
+                    <span class="text-slate-500">${c.count} items</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div class="bg-indigo-600 h-2 rounded-full" style="width: ${pct}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+
+          // Render Hotspots
+          const hotContainer = document.getElementById('analytics-hotspots-list');
+          if (hotContainer && a.hotspots.length > 0) {
+            hotContainer.innerHTML = a.hotspots.map(h => `
+              <div class="flex items-center justify-between p-2 rounded-xl bg-slate-50 text-xs border border-slate-100">
+                <span class="font-semibold text-slate-800 truncate mr-2"><i class="fas fa-map-pin text-rose-500 mr-1.5"></i> ${h.location}</span>
+                <span class="px-2 py-0.5 rounded-full font-bold bg-slate-200 text-slate-700 text-[10px]">${h.count} found</span>
+              </div>
+            `).join('');
+          }
+        }
+      } catch (err) {
+        console.warn('Could not load live analytics:', err.message);
+      }
+    }
+
+    // 2. Load Item Inventory Table
+    async function loadAdminItems() {
+      try {
+        const [lostRes, foundRes] = await Promise.all([
+          API.items.getAllLost({ limit: 50 }),
+          API.items.getAllFound({ limit: 50 })
+        ]);
+
+        currentItems = [];
+        if (lostRes && lostRes.data) {
+          lostRes.data.forEach(i => currentItems.push({ ...i, type: 'lost', id: i._id }));
+        }
+        if (foundRes && foundRes.data) {
+          foundRes.data.forEach(i => currentItems.push({ ...i, type: 'found', id: i._id }));
+        }
+
+        renderAdminItemsTable();
+      } catch (err) {
+        console.warn('Items table error:', err.message);
+      }
+    }
+
+    function renderAdminItemsTable() {
+      const tbody = document.getElementById('admin-items-tbody');
+      const search = (document.getElementById('admin-search-items')?.value || '').toLowerCase();
+      const typeFilter = document.getElementById('admin-filter-type')?.value || 'all';
+      const statusFilter = document.getElementById('admin-filter-status')?.value || 'all';
+
+      let filtered = currentItems.filter(item => {
+        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+        if (statusFilter !== 'all' && item.status !== statusFilter) return false;
+        if (search) {
+          const matchTitle = (item.title || '').toLowerCase().includes(search);
+          const matchLoc = (item.location || '').toLowerCase().includes(search);
+          const matchCat = (item.category || '').toLowerCase().includes(search);
+          if (!matchTitle && !matchLoc && !matchCat) return false;
+        }
+        return true;
+      });
+
+      tbody.innerHTML = filtered.map(item => {
+        const isLost = item.type === 'lost';
+        const isReturned = item.status === 'returned';
+
+        return `
+          <tr class="hover:bg-slate-50 transition-colors">
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=100&q=80'}" class="w-9 h-9 rounded-lg object-cover border border-slate-200">
+                <div>
+                  <p class="font-bold text-slate-900">${item.title}</p>
+                  <span class="text-[10px] text-slate-400">#${item.id || item._id}</span>
+                </div>
+              </div>
+            </td>
+            <td class="py-3 px-4 font-bold ${isLost ? 'text-rose-600' : 'text-emerald-600'} uppercase text-[10px]">
+              ${item.type}
+            </td>
+            <td class="py-3 px-4 text-slate-600">${item.category}</td>
+            <td class="py-3 px-4 text-slate-500">${item.location}</td>
+            <td class="py-3 px-4 text-slate-500">${item.date ? item.date.split('T')[0] : 'Recent'}</td>
+            <td class="py-3 px-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isReturned ? 'bg-slate-200 text-slate-700' : 'bg-emerald-100 text-emerald-800'}">
+                ${isReturned ? 'RETURNED' : 'ACTIVE'}
+              </span>
+            </td>
+            <td class="py-3 px-4 text-right space-x-1">
+              <a href="item-details.html?id=${item.id || item._id}&type=${item.type}" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px]">Inspect</a>
+              <button onclick="adminDeleteItem('${item.type}', '${item.id || item._id}')" class="px-2.5 py-1 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold text-[11px]" title="Delete Report"><i class="fas fa-trash-alt"></i></button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // 3. Load Live Claims Queue
+    async function loadAdminClaims() {
+      const container = document.getElementById('admin-claims-list');
+      try {
+        const res = await API.admin.getClaims();
+        if (res && res.data && res.data.length > 0) {
+          container.innerHTML = res.data.map(claim => {
+            const isApproved = claim.status === 'approved';
+            const isPending = claim.status === 'pending';
+
+            return `
+              <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : (isApproved ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800')} uppercase">
+                      ${claim.status}
+                    </span>
+                    <span class="text-xs font-bold text-slate-400">Claim ID #${claim._id}</span>
+                  </div>
+                  <h4 class="font-bold text-slate-900 text-sm">Claimant: ${claim.claimantName} (${claim.claimantEmail})</h4>
+                  <p class="text-xs text-slate-600 mt-1">
+                    <strong>Challenge Proof Answer:</strong> "${claim.proofDetails}"
+                  </p>
+                  ${claim.reviewerNotes ? `<p class="text-[11px] text-emerald-700 mt-1"><strong>Officer Notes:</strong> ${claim.reviewerNotes}</p>` : ''}
+                </div>
+                ${isPending ? `
+                  <div class="flex items-center gap-2 self-end md:self-center">
+                    <button onclick="openApproveClaimModal('${claim._id}', '${claim.proofDetails.replace(/'/g, "\\'")}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-1.5">
+                      <i class="fas fa-check"></i> Approve Handover
+                    </button>
+                    <button onclick="declineClaimPrompt('${claim._id}')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+                      Decline
+                    </button>
+                  </div>
+                ` : `
+                  <span class="text-xs font-bold text-slate-400 italic">Resolved</span>
+                `}
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '<div class="p-8 text-center text-slate-400 text-xs">No pending ownership claims in queue.</div>';
+        }
+      } catch (err) {
+        console.warn('Claims queue error:', err.message);
+      }
+    }
+
+    // 4. Load Live Audit Logs Trail
+    async function loadAuditLogs() {
+      const tbody = document.getElementById('admin-audit-tbody');
+      const action = document.getElementById('audit-action-filter')?.value || '';
+
+      try {
+        const res = await API.admin.getAuditLogs({ action });
+        if (res && res.data && res.data.length > 0) {
+          tbody.innerHTML = res.data.map(log => {
+            const badgeBg =
+              log.action === 'CLAIM_APPROVED' ? 'bg-emerald-100 text-emerald-800' :
+              log.action === 'CLAIM_REJECTED' ? 'bg-rose-100 text-rose-800' :
+              log.action === 'USER_ROLE_UPDATED' ? 'bg-purple-100 text-purple-800' :
+              log.action === 'VAULT_INTAKE' ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-800';
+
+            return `
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 font-bold text-[10px]">
+                  <span class="px-2 py-0.5 rounded-full ${badgeBg}">${log.action}</span>
+                </td>
+                <td class="py-3 px-4 font-bold text-slate-800">${log.performerName} <span class="text-[10px] text-slate-400 font-normal">(${log.performerRole})</span></td>
+                <td class="py-3 px-4 text-slate-700 max-w-xs truncate">${log.details}</td>
+                <td class="py-3 px-4 text-slate-500 font-mono text-[10px]">${log.targetType} #${log.targetId ? log.targetId.slice(-6) : '-'}</td>
+                <td class="py-3 px-4 text-slate-400 font-mono text-[10px]">${log.ipAddress || '127.0.0.1'}</td>
+                <td class="py-3 px-4 text-right text-slate-400 text-[10px]">${new Date(log.createdAt).toLocaleString()}</td>
+              </tr>
+            `;
+          }).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="6" class="p-6 text-center text-slate-400">No audit records found.</td></tr>';
+        }
+      } catch (err) {
+        console.warn('Audit trail error:', err.message);
+      }
+    }
+
+    // 5. Load Live Users Directory
+    async function loadAdminUsers() {
+      const tbody = document.getElementById('admin-users-tbody');
+      try {
+        const res = await API.admin.getUsers();
+        if (res && res.data && res.data.length > 0) {
+          tbody.innerHTML = res.data.map(u => `
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-7 h-7 rounded-full object-cover">
+                ${u.name}
+              </td>
+              <td class="py-3 px-4 text-slate-600">${u.email}</td>
+              <td class="py-3 px-4">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.role === 'Admin' ? 'bg-slate-900 text-white' : (u.role === 'Security' ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700')}">
+                  ${u.role}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-slate-500">${u.department || 'Campus General'}</td>
+              <td class="py-3 px-4 font-bold text-emerald-600">${u.trustPoints || 100} pts</td>
+              <td class="py-3 px-4 text-right">
+                <button onclick="openEditUserModal('${u._id}', '${u.name.replace(/'/g, "\\'")}', '${u.role}', ${u.trustPoints || 100})" class="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">
+                  Edit Role
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        }
+      } catch (err) {
+        console.warn('Users directory error:', err.message);
+      }
+    }
+
+    // Modal Control Functions
+    function openApproveClaimModal(claimId, proofText) {
+      document.getElementById('modal-claim-id').value = claimId;
+      document.getElementById('modal-claim-proof').textContent = `"${proofText}"`;
+      document.getElementById('approve-claim-modal').classList.remove('hidden');
+    }
+    function closeApproveClaimModal() {
+      document.getElementById('approve-claim-modal').classList.add('hidden');
+    }
+
+    document.getElementById('approve-claim-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('modal-claim-id').value;
+      const notes = document.getElementById('modal-reviewer-notes').value.trim();
+      const locker = document.getElementById('modal-pickup-locker').value.trim();
+
+      try {
+        await API.admin.updateClaimDecision(id, 'approved', notes, locker);
+        alert('Claim approved! Handover logged to compliance audit trail.');
+        closeApproveClaimModal();
+        loadAdminKPIs();
+        loadAdminClaims();
+        loadAuditLogs();
+      } catch (err) {
+        alert('Action error: ' + err.message);
+      }
+    });
+
+    async function declineClaimPrompt(claimId) {
+      const reason = prompt('Please enter the reason for declining this claim:');
+      if (reason) {
+        try {
+          await API.admin.updateClaimDecision(claimId, 'rejected', reason);
+          alert('Claim declined and logged to audit trail.');
+          loadAdminKPIs();
+          loadAdminClaims();
+          loadAuditLogs();
+        } catch (err) {
+          alert('Error declining claim: ' + err.message);
+        }
+      }
+    }
+
+    function openEditUserModal(id, name, role, points) {
+      document.getElementById('edit-user-id').value = id;
+      document.getElementById('edit-user-name').value = name;
+      document.getElementById('edit-user-role').value = role;
+      document.getElementById('edit-user-points').value = points;
+      document.getElementById('edit-user-modal').classList.remove('hidden');
+    }
+    function closeEditUserModal() {
+      document.getElementById('edit-user-modal').classList.add('hidden');
+    }
+
+    document.getElementById('edit-user-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('edit-user-id').value;
+      const role = document.getElementById('edit-user-role').value;
+      const trustPoints = parseInt(document.getElementById('edit-user-points').value, 10);
+
+      try {
+        await API.admin.updateUser(id, { role, trustPoints });
+        alert('User permissions updated and logged to audit trail.');
+        closeEditUserModal();
+        loadAdminUsers();
+        loadAuditLogs();
+      } catch (err) {
+        alert('Error updating user: ' + err.message);
+      }
+    });
+
+    async function adminDeleteItem(type, id) {
+      if (confirm(`Permanently delete this ${type} item from the portal? This action will be recorded in the audit trail.`)) {
+        try {
+          await API.admin.deleteItem(type, id);
+          alert('Item permanently removed.');
+          loadAdminKPIs();
+          loadAdminItems();
+          loadAuditLogs();
+        } catch (err) {
+          alert('Error deleting item: ' + err.message);
+        }
+      }
+    }
+
+    // Vault Custody Modal
+    function openCustodyModal() {
+      const select = document.getElementById('custody-item-id');
+      const foundItems = currentItems.filter(i => i.type === 'found' && i.status === 'active');
+      select.innerHTML = foundItems.map(i => `<option value="${i.id}">${i.title} (${i.location})</option>`).join('');
+      document.getElementById('custody-modal').classList.remove('hidden');
+    }
+    function closeCustodyModal() {
+      document.getElementById('custody-modal').classList.add('hidden');
+    }
+
+    document.getElementById('custody-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const itemId = document.getElementById('custody-item-id').value;
+      const lockerNumber = document.getElementById('custody-locker-no').value.trim();
+      const officerNotes = document.getElementById('custody-notes').value.trim();
+
+      try {
+        await API.admin.logCustody({ itemId, lockerNumber, officerNotes });
+        alert(`Item successfully stored in ${lockerNumber}.`);
+        closeCustodyModal();
+        loadAdminKPIs();
+        loadAuditLogs();
+        loadAdminItems();
+      } catch (err) {
+        alert('Error logging custody: ' + err.message);
+      }
+    });
+
+    // Auto-search and filter items
+    document.getElementById('admin-search-items')?.addEventListener('input', renderAdminItemsTable);
+    document.getElementById('admin-filter-type')?.addEventListener('change', renderAdminItemsTable);
+    document.getElementById('admin-filter-status')?.addEventListener('change', renderAdminItemsTable);
+    document.getElementById('audit-action-filter')?.addEventListener('change', loadAuditLogs);
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAdminKPIs();
+      loadAdminItems();
+      loadAdminClaims();
+      loadAuditLogs();
+      loadAdminUsers();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Details | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="dashboard.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Dashboard</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="my-reports.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">My Reports</a>
+          <a href="report-lost.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+        </nav>
+
+        <!-- Right Action Items -->
+        <div class="hidden md:flex items-center gap-3">
+          <button class="open-chat-trigger relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Messages & Peer Chat">
+            <i class="far fa-comments text-lg"></i>
+            <span class="chat-nav-badge hidden absolute top-1 right-1 w-4 h-4 bg-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> User Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Nav -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Home</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Dashboard</a>
+      <a href="browse-items.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Browse Items</a>
+      <a href="my-reports.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">My Reports</a>
+      <a href="report-lost.html" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600">Report Lost</a>
+      <a href="report-found.html" class="block px-3 py-2 rounded-lg text-base font-medium text-emerald-600">Report Found</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+    
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-6">
+      <a href="index.html" class="hover:text-indigo-600">Home</a>
+      <i class="fas fa-chevron-right text-[10px]"></i>
+      <a href="browse-items.html" class="hover:text-indigo-600">Browse Items</a>
+      <i class="fas fa-chevron-right text-[10px]"></i>
+      <span id="breadcrumb-title" class="text-slate-800 truncate max-w-xs">Item Details</span>
+    </nav>
+
+    <!-- Item Card Two-Column Layout -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden mb-12">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+        
+        <!-- Left: Image & Social Actions (5 cols) -->
+        <div class="lg:col-span-5 p-6 sm:p-8 bg-slate-50/50 border-b lg:border-b-0 lg:border-r border-slate-200/80 flex flex-col justify-between">
+          <div>
+            <!-- Main Photo -->
+            <div class="relative rounded-2xl overflow-hidden bg-slate-200 border border-slate-200 shadow-sm group">
+              <img id="detail-image" src="https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80" alt="Item photo" class="w-full h-80 sm:h-96 object-cover group-hover:scale-105 transition-transform duration-300">
+              
+              <!-- Badges on image -->
+              <div class="absolute top-4 left-4 flex flex-col gap-2">
+                <span id="detail-type-badge" class="px-3 py-1 rounded-full text-xs font-extrabold bg-rose-600 text-white shadow-md">
+                  LOST
+                </span>
+                <span id="detail-status-badge" class="hidden px-2.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-white shadow-sm">
+                  RETURNED
+                </span>
+              </div>
+
+              <div id="detail-reward-tag" class="absolute bottom-4 right-4 px-3 py-1 rounded-xl text-xs font-extrabold bg-white/95 text-slate-900 shadow-md backdrop-blur-sm">
+                Reward: $50
+              </div>
+            </div>
+
+            <!-- Share & Action tools -->
+            <div class="mt-6 flex items-center justify-between text-xs text-slate-500 pt-4 border-t border-slate-200">
+              <span class="font-semibold text-slate-600">Spread the word:</span>
+              <div class="flex items-center gap-2">
+                <button onclick="navigator.clipboard.writeText(window.location.href); LFApp.showToast('Link copied to clipboard!', 'info');" class="p-2 rounded-lg bg-white border border-slate-200 hover:text-indigo-600 transition-colors" title="Copy Link">
+                  <i class="fas fa-link"></i>
+                </button>
+                <button onclick="window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(window.location.href), '_blank')" class="p-2 rounded-lg bg-white border border-slate-200 hover:text-emerald-600 transition-colors" title="WhatsApp">
+                  <i class="fab fa-whatsapp"></i>
+                </button>
+                <button onclick="window.print()" class="p-2 rounded-lg bg-white border border-slate-200 hover:text-slate-800 transition-colors" title="Print Flyer">
+                  <i class="fas fa-print"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Safe Meetup Reminder -->
+          <div class="mt-6 p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-900">
+            <div class="flex items-center gap-2 font-bold mb-1">
+              <i class="fas fa-shield-alt text-indigo-600"></i> Campus Safety Advisory
+            </div>
+            <p class="text-indigo-800/80 leading-relaxed text-[11px]">
+              For personal security, always conduct property returns at the Central Campus Lost & Found Office (Building A, Room 104) or in broad daylight at public service desks.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Item Specifications & Claims (7 cols) -->
+        <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between">
+          <div>
+            <!-- Header Meta -->
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <span id="detail-category" class="px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider bg-indigo-50 text-indigo-600">
+                Electronics
+              </span>
+              <span id="detail-id" class="text-xs font-bold text-slate-400">
+                Item #LF-1001
+              </span>
+            </div>
+
+            <!-- Title -->
+            <h1 id="detail-title" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug">
+              iPhone 13 (Midnight Blue with Clear Case)
+            </h1>
+
+            <!-- Meta details row -->
+            <div class="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-500 pb-5 border-b border-slate-100">
+              <div class="flex items-center gap-1.5">
+                <i class="far fa-calendar-alt text-slate-400"></i>
+                <span id="detail-date">Reported Oct 30, 2026</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <i class="fas fa-map-marker-alt text-rose-500"></i>
+                <span id="detail-location">Main Campus Library, 2nd Floor</span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="my-6">
+              <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Detailed Description</h3>
+              <p id="detail-desc" class="text-sm text-slate-700 leading-relaxed">
+                Lost my iPhone 13 in a transparent shockproof case with a small cat sticker on the back. Screen has a tempered glass protector. Battery was around 20% when lost. Urgently needed for coursework and multi-factor logins.
+              </p>
+            </div>
+
+            <!-- Verification Question Highlight -->
+            <div id="detail-security-box" class="p-4 rounded-2xl bg-amber-50 border border-amber-200 mb-6">
+              <h4 class="text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                <i class="fas fa-key text-amber-600"></i> Verification Security Challenge
+              </h4>
+              <p id="detail-security-question" class="text-xs text-amber-900">
+                "What is the lock screen wallpaper photo?"
+              </p>
+            </div>
+
+            <!-- Reporter Profile Box -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 mb-6 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                  <i class="far fa-user"></i>
+                </div>
+                <div>
+                  <p class="text-xs text-slate-400 font-medium">Reported by</p>
+                  <p id="detail-reporter-name" class="text-sm font-bold text-slate-900">Alex</p>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+                <i class="fas fa-check-circle text-xs"></i> Verified User
+              </span>
+            </div>
+          </div>
+
+          <!-- Action Buttons / Modal Triggers -->
+          <div id="action-buttons-container" class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+            <button id="claim-modal-trigger" class="flex-grow py-3.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-200 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+              <i class="fas fa-hand-holding-heart"></i>
+              <span>Claim This Item (Prove Ownership)</span>
+            </button>
+            <button id="btn-start-chat" class="py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+              <i class="far fa-comments"></i>
+              <span>Live Chat with Reporter</span>
+            </button>
+            <button id="tip-modal-trigger" class="py-3.5 px-5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-colors flex items-center justify-center gap-2">
+              <i class="far fa-envelope"></i>
+              <span>Send Tip</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Potential Matches / Similar Items Section -->
+    <section class="mt-12">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">Other Relevant Items</h2>
+          <p class="text-xs text-slate-500">Items discovered around the same timeframe</p>
+        </div>
+        <a href="browse-items.html" class="text-xs font-bold text-indigo-600 hover:underline">View All</a>
+      </div>
+
+      <div id="similar-items-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <!-- Dynamically rendered similar cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CLAIM MODAL -->
+  <div id="claim-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Submit Ownership Claim</h3>
+          <p class="text-xs text-slate-500">Provide proof to verify you are the legitimate owner</p>
+        </div>
+        <button id="close-claim-modal" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="claim-form" class="mt-5 space-y-4">
+        
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900">
+          <span class="font-bold">Required Verification Question:</span>
+          <p id="modal-security-question" class="mt-1 italic">"What is the lock screen wallpaper photo?"</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Your Answer / Proof Description <span class="text-rose-500">*</span></label>
+          <textarea id="claim-proof" rows="3" required placeholder="State your exact answer, unique scratches, receipts, or serial details..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Your Name</label>
+            <input type="text" id="claimant-name" value="Alex" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
+            <input type="tel" id="claimant-phone" value="+1 (555) 234-5678" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <button type="button" onclick="document.getElementById('claim-modal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md">
+            Submit Claim Verification
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- CONTACT / TIP MODAL -->
+  <div id="tip-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900">Send Message or Tip</h3>
+          <p class="text-xs text-slate-500">Contact the reporter with helpful information</p>
+        </div>
+        <button onclick="document.getElementById('tip-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <form id="tip-form" class="mt-5 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Your Message <span class="text-rose-500">*</span></label>
+          <textarea id="tip-message" rows="4" required placeholder="Let them know where you saw the item or if you turned it into Campus Security Desk..." class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white"></textarea>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <button type="button" onclick="document.getElementById('tip-modal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md">
+            Send Message
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>&copy; 2026 FinderSpot Platform. Community Lost & Found Network.</p>
+      <div class="flex items-center gap-4">
+        <a href="contact.html" class="hover:text-indigo-600">Contact Help Desk</a>
+        <a href="browse-items.html" class="hover:text-indigo-600">Browse All Items</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Extract Item ID and Type from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const itemId = urlParams.get('id') || 'LF-1001';
+    const itemType = urlParams.get('type') || 'lost';
+    let currentItem = null;
+
+    function renderDetails(item) {
+      if (!item) return;
+      document.title = `${item.title} | FinderSpot`;
+      document.getElementById('breadcrumb-title').textContent = item.title;
+      document.getElementById('detail-id').textContent = `Item #${item.id}`;
+      document.getElementById('detail-title').textContent = item.title;
+      document.getElementById('detail-category').textContent = item.category;
+      document.getElementById('detail-desc').textContent = item.description;
+      document.getElementById('detail-location').textContent = item.location;
+      document.getElementById('detail-date').textContent = `${item.type === 'lost' ? 'Lost on' : 'Found on'} ${item.date}`;
+      document.getElementById('detail-reporter-name').textContent = item.reporterName || 'Campus Community Member';
+      document.getElementById('detail-image').src = item.image;
+
+      // Badges
+      const typeBadge = document.getElementById('detail-type-badge');
+      const rewardTag = document.getElementById('detail-reward-tag');
+      const statusBadge = document.getElementById('detail-status-badge');
+
+      if (item.type === 'lost') {
+        typeBadge.textContent = 'LOST';
+        typeBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-rose-600 text-white shadow-md';
+        if (item.reward) {
+          rewardTag.textContent = `Reward: ${item.reward}`;
+          rewardTag.classList.remove('hidden');
+        } else {
+          rewardTag.classList.add('hidden');
+        }
+      } else {
+        typeBadge.textContent = 'FOUND';
+        typeBadge.className = 'px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-600 text-white shadow-md';
+        rewardTag.classList.add('hidden');
+      }
+
+      if (item.status === 'returned') {
+        statusBadge.classList.remove('hidden');
+      }
+
+      // Security Question
+      const secBox = document.getElementById('detail-security-box');
+      const secQ = document.getElementById('detail-security-question');
+      const modalSecQ = document.getElementById('modal-security-question');
+      if (item.securityQuestion) {
+        secQ.textContent = `"${item.securityQuestion}"`;
+        modalSecQ.textContent = `"${item.securityQuestion}"`;
+        secBox.classList.remove('hidden');
+      } else {
+        secBox.classList.add('hidden');
+      }
+
+      loadSimilarItems();
+    }
+
+    async function loadItemDetails() {
+      // 1. Try Local Storage first
+      if (typeof LFApp !== 'undefined') {
+        currentItem = LFApp.getItemById(itemId);
+      }
+
+      // 2. If not found in local storage, query live MongoDB REST API
+      if (!currentItem && window.API) {
+        try {
+          const type = urlParams.get('type') || itemType;
+          const fetchPromise = type === 'lost' ? window.API.items.getLostById(itemId) : window.API.items.getFoundById(itemId);
+          const res = await fetchPromise;
+          if (res && res.data) {
+            const d = res.data;
+            currentItem = {
+              id: d._id,
+              title: d.title,
+              type: type,
+              category: d.category,
+              location: d.location,
+              date: d.date ? d.date.split('T')[0] : 'Recent',
+              time: d.time || '',
+              reward: d.reward || '',
+              status: d.status || 'active',
+              description: d.description,
+              image: d.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80',
+              reporter: d.reporter,
+              reporterName: (d.reporter && d.reporter.name) || d.reporterName || 'Campus Community Member',
+              securityQuestion: d.securityQuestion || ''
+            };
+          }
+        } catch (err) {
+          console.warn('API detail lookup failed:', err);
+        }
+      }
+
+      // 3. Fallback to first available local item if still not found
+      if (!currentItem && typeof LFApp !== 'undefined') {
+        const all = LFApp.getItems();
+        currentItem = all[0];
+      }
+
+      if (currentItem) {
+        renderDetails(currentItem);
+      }
+    }
+
+    function loadSimilarItems() {
+      const all = LFApp.getItems();
+      const similar = all.filter(i => i.id !== currentItem.id).slice(0, 3);
+      const container = document.getElementById('similar-items-grid');
+      
+      container.innerHTML = similar.map(item => `
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col">
+          <div class="relative h-40 overflow-hidden bg-slate-100">
+            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}">
+              ${item.type.toUpperCase()}
+            </span>
+          </div>
+          <div class="p-4 flex flex-col flex-grow">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">${item.category}</span>
+            <h4 class="font-bold text-slate-800 text-sm mt-0.5 line-clamp-1">${item.title}</h4>
+            <p class="text-xs text-slate-500 mt-1 line-clamp-1"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${item.location}</p>
+            <a href="item-details.html?id=${item.id}" class="mt-3 block text-center py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-600 hover:text-white text-xs font-semibold text-slate-700 transition-colors">
+              View Item
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Modal Handlers
+    const claimModal = document.getElementById('claim-modal');
+    const claimBtn = document.getElementById('claim-modal-trigger');
+    const closeClaimBtn = document.getElementById('close-claim-modal');
+    const tipModal = document.getElementById('tip-modal');
+    const tipBtn = document.getElementById('tip-modal-trigger');
+
+    if (claimBtn) claimBtn.addEventListener('click', () => claimModal.classList.remove('hidden'));
+    if (closeClaimBtn) closeClaimBtn.addEventListener('click', () => claimModal.classList.add('hidden'));
+    if (tipBtn) tipBtn.addEventListener('click', () => tipModal.classList.remove('hidden'));
+
+    // Claim Submission
+    document.getElementById('claim-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const proof = document.getElementById('claim-proof').value;
+      const name = document.getElementById('claimant-name').value;
+      const phone = document.getElementById('claimant-phone').value;
+
+      if (typeof LFApp !== 'undefined') {
+        LFApp.submitClaim({
+          itemId: currentItem ? currentItem.id : itemId,
+          name: name,
+          phone: phone,
+          proofDetails: proof
+        });
+        LFApp.showToast('Claim submitted! The reporter and campus desk have been notified.', 'success');
+      }
+      claimModal.classList.add('hidden');
+      document.getElementById('claim-proof').value = '';
+    });
+
+    // Tip Submission
+    document.getElementById('tip-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      LFApp.showToast('Your message has been dispatched safely to the reporter.', 'success');
+      tipModal.classList.add('hidden');
+      document.getElementById('tip-message').value = '';
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadItemDetails();
+
+      const btnChat = document.getElementById('btn-start-chat');
+      if (btnChat) {
+        btnChat.addEventListener('click', () => {
+          const reporterId = currentItem?.reporter?._id || currentItem?.reporter;
+          if (window.LFChat) {
+            window.LFChat.openItemChat(itemId, itemType, reporterId);
+          }
+        });
+      }
+    });
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

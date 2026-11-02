@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Items | FinderSpot</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Home</a>
+          <a href="dashboard.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Dashboard</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-semibold text-indigo-600 bg-indigo-50 transition-colors">Browse Items</a>
+          <a href="map.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-map-marked-alt text-xs text-indigo-500"></i> Live Map
+          </a>
+          <a href="my-reports.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">My Reports</a>
+          <a href="report-lost.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+        </nav>
+
+        <!-- Right Action Items -->
+        <div class="hidden md:flex items-center gap-3">
+          <!-- Real-Time Chat Button -->
+          <button class="open-chat-trigger relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Messages & Peer Chat">
+            <i class="far fa-comments text-lg"></i>
+            <span class="chat-nav-badge hidden absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> User Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <div class="flex md:hidden items-center gap-2">
+          <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 hover:bg-slate-100">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Home</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">Dashboard</a>
+      <a href="browse-items.html" class="block px-3 py-2 rounded-lg text-base font-semibold text-indigo-600 bg-indigo-50">Browse Items</a>
+      <a href="my-reports.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700">My Reports</a>
+      <a href="report-lost.html" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600">Report Lost</a>
+      <a href="report-found.html" class="block px-3 py-2 rounded-lg text-base font-medium text-emerald-600">Report Found</a>
+    </div>
+  </header>
+
+  <!-- Page Header -->
+  <section class="bg-white border-b border-slate-200 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Browse Reported Items</h1>
+          <p class="text-sm text-slate-500 mt-1">Search through recent lost and found belongings across the entire campus</p>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <a href="map.html" class="px-3.5 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors border border-indigo-100">
+            <i class="fas fa-map-marked-alt text-indigo-600"></i> Interactive Map
+          </a>
+          <a href="report-lost.html" class="px-3.5 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors border border-rose-100">
+            <i class="fas fa-plus"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors border border-emerald-100">
+            <i class="fas fa-plus"></i> Report Found
+          </a>
+        </div>
+      </div>
+
+      <!-- Search and Filter Bar -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-12 gap-3">
+        <!-- Search Input -->
+        <div class="md:col-span-4 relative">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input type="text" id="search-input" placeholder="Search by name, brand, or keyword..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+        </div>
+
+        <!-- Type Selector -->
+        <div class="md:col-span-3">
+          <select id="type-filter" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            <option value="all">All Types (Lost & Found)</option>
+            <option value="lost">Lost Belongings Only</option>
+            <option value="found">Found Items Only</option>
+          </select>
+        </div>
+
+        <!-- Category Selector -->
+        <div class="md:col-span-3">
+          <select id="category-filter" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            <option value="all">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Wallets & Cards">Wallets & Cards</option>
+            <option value="Keys">Keys</option>
+            <option value="Bags & Luggage">Bags & Backpacks</option>
+            <option value="Books & Stationery">Books & Stationery</option>
+            <option value="Accessories">Accessories & Jewelry</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="md:col-span-2">
+          <select id="sort-filter" class="w-full px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Category Pills -->
+      <div class="mt-4 flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
+        <span class="text-xs font-semibold text-slate-400 mr-1">Quick Filters:</span>
+        <button class="filter-pill active px-3 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white" data-type="all">All</button>
+        <button class="filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200" data-type="lost">Lost Items</button>
+        <button class="filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200" data-type="found">Found Items</button>
+        <button class="filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="Electronics">Electronics</button>
+        <button class="filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="Wallets & Cards">Wallets</button>
+        <button class="filter-pill px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200" data-category="Keys">Keys</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Items Grid Section -->
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+    
+    <!-- Results Header -->
+    <div class="flex items-center justify-between mb-6">
+      <p class="text-sm font-semibold text-slate-500">
+        Showing <span id="results-count" class="text-slate-900 font-bold">0</span> items
+      </p>
+      <button id="reset-filters-btn" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 hidden">
+        Reset filters <i class="fas fa-undo-alt ml-1"></i>
+      </button>
+    </div>
+
+    <!-- Dynamic Items Container -->
+    <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <!-- Populated dynamically via JavaScript -->
+    </div>
+
+    <!-- Empty State Message -->
+    <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-slate-200/80 p-8 max-w-md mx-auto">
+      <div class="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl mb-4">
+        <i class="fas fa-search"></i>
+      </div>
+      <h3 class="text-base font-bold text-slate-900">No Matching Items Found</h3>
+      <p class="text-xs text-slate-500 mt-1">Try adjusting your search keywords, clear category filters, or report the item.</p>
+      <div class="mt-6 flex justify-center gap-3">
+        <button onclick="resetAllFilters()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-200">
+          Reset Filters
+        </button>
+        <a href="report-lost.html" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700">
+          Report as Lost
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>&copy; 2026 FinderSpot Platform. Community Lost & Found Network.</p>
+      <div class="flex items-center gap-4">
+        <a href="contact.html" class="hover:text-indigo-600">Contact Support</a>
+        <a href="dashboard.html" class="hover:text-indigo-600">My Dashboard</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/chat.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // State filters
+    let currentFilters = {
+      search: '',
+      type: 'all',
+      category: 'all',
+      sort: 'newest'
+    };
+
+    // Parse URL query parameters on load
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('q')) currentFilters.search = urlParams.get('q');
+    if (urlParams.get('type')) currentFilters.type = urlParams.get('type');
+    if (urlParams.get('category')) currentFilters.category = urlParams.get('category');
+
+    // Populate filter inputs with current values
+    document.getElementById('search-input').value = currentFilters.search;
+    document.getElementById('type-filter').value = currentFilters.type;
+    document.getElementById('category-filter').value = currentFilters.category;
+
+    // Render items function
+    function renderItems() {
+      const items = (typeof LFApp !== 'undefined') ? LFApp.getItems() : [];
+      const grid = document.getElementById('items-grid');
+      const emptyState = document.getElementById('empty-state');
+      const countEl = document.getElementById('results-count');
+
+      // Filter
+      let filtered = items.filter(item => {
+        // Type filter
+        if (currentFilters.type !== 'all' && item.type !== currentFilters.type) return false;
+        // Category filter
+        if (currentFilters.category !== 'all' && item.category !== currentFilters.category) return false;
+        // Search keyword
+        if (currentFilters.search) {
+          const q = currentFilters.search.toLowerCase();
+          const matchTitle = item.title.toLowerCase().includes(q);
+          const matchDesc = item.description.toLowerCase().includes(q);
+          const matchLoc = item.location.toLowerCase().includes(q);
+          const matchTag = item.tags && item.tags.some(t => t.toLowerCase().includes(q));
+          if (!matchTitle && !matchDesc && !matchLoc && !matchTag) return false;
+        }
+        return true;
+      });
+
+      // Sort
+      if (currentFilters.sort === 'newest') {
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      } else if (currentFilters.sort === 'oldest') {
+        filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+      }
+
+      countEl.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(item => {
+        const isLost = item.type === 'lost';
+        const typeBadge = isLost 
+          ? `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">LOST</span>`
+          : `<span class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">FOUND</span>`;
+
+        const rewardTag = item.reward 
+          ? `<span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">Reward: ${item.reward}</span>`
+          : '';
+
+        const actionBtn = isLost
+          ? `<a href="item-details.html?id=${item.id}" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-rose-600 hover:text-white font-semibold text-xs text-center transition-colors">View Details & Help</a>`
+          : `<a href="item-details.html?id=${item.id}" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">Claim This Item</a>`;
+
+        return `
+          <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+            <div class="relative h-48 overflow-hidden bg-slate-100">
+              <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80'">
+              <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                ${typeBadge}
+                ${item.status === 'returned' ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-white">RETURNED</span>' : ''}
+              </div>
+              ${rewardTag}
+            </div>
+            <div class="p-5 flex flex-col flex-grow">
+              <div class="text-xs font-semibold ${isLost ? 'text-rose-600' : 'text-emerald-600'} uppercase tracking-wider mb-1">${item.category}</div>
+              <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">${item.title}</h3>
+              <p class="text-xs text-slate-500 mt-2 line-clamp-2">${item.description}</p>
+              <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+                <div class="flex items-center gap-2">
+                  <i class="fas fa-map-marker-alt ${isLost ? 'text-rose-500' : 'text-emerald-500'} w-3.5"></i>
+                  <span class="truncate">${item.location}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <i class="far fa-clock text-slate-400 w-3.5"></i>
+                  <span>${item.date}</span>
+                </div>
+              </div>
+              ${actionBtn}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Attach Event Listeners
+    document.getElementById('search-input').addEventListener('input', function(e) {
+      currentFilters.search = e.target.value.trim();
+      renderItems();
+    });
+
+    document.getElementById('type-filter').addEventListener('change', function(e) {
+      currentFilters.type = e.target.value;
+      renderItems();
+    });
+
+    document.getElementById('category-filter').addEventListener('change', function(e) {
+      currentFilters.category = e.target.value;
+      renderItems();
+    });
+
+    document.getElementById('sort-filter').addEventListener('change', function(e) {
+      currentFilters.sort = e.target.value;
+      renderItems();
+    });
+
+    // Pill filters
+    document.querySelectorAll('.filter-pill').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-pill').forEach(b => {
+          b.classList.remove('bg-indigo-600', 'text-white');
+          b.classList.add('bg-slate-100', 'text-slate-600');
+        });
+        this.classList.remove('bg-slate-100', 'text-slate-600');
+        this.classList.add('bg-indigo-600', 'text-white');
+
+        if (this.dataset.type) {
+          currentFilters.type = this.dataset.type;
+          document.getElementById('type-filter').value = this.dataset.type;
+        }
+        if (this.dataset.category) {
+          currentFilters.category = this.dataset.category;
+          document.getElementById('category-filter').value = this.dataset.category;
+        }
+        renderItems();
+      });
+    });
+
+    function resetAllFilters() {
+      currentFilters = { search: '', type: 'all', category: 'all', sort: 'newest' };
+      document.getElementById('search-input').value = '';
+      document.getElementById('type-filter').value = 'all';
+      document.getElementById('category-filter').value = 'all';
+      renderItems();
+    }
+
+    // Expose renderItems globally for live MongoDB sync
+    window.renderItems = renderItems;
+
+    // Initial render
+    document.addEventListener('DOMContentLoaded', renderItems);
+  </script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

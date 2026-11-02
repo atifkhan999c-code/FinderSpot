@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinderSpot | Lost and Found Web Portal</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            primary: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+  <!-- Main Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform">
+            <i class="fas fa-search-location text-lg"></i>
+          </div>
+          <div>
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">Finder<span class="text-indigo-600">Spot</span></span>
+            <span class="block text-[10px] font-semibold tracking-wider text-slate-400 uppercase -mt-1">Lost & Found Portal</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center gap-1">
+          <a href="index.html" class="px-3.5 py-2 rounded-lg text-sm font-semibold text-indigo-600 bg-indigo-50 transition-colors">Home</a>
+          <a href="browse-items.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Browse Items</a>
+          <a href="map.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-map-marked-alt text-xs text-indigo-500"></i> Live Map
+          </a>
+          <a href="report-lost.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-exclamation-circle text-xs"></i> Report Lost
+          </a>
+          <a href="report-found.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors flex items-center gap-1.5">
+            <i class="fas fa-hand-holding-heart text-xs"></i> Report Found
+          </a>
+          <a href="contact.html" class="px-3.5 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-slate-50 transition-colors">Contact & Support</a>
+        </nav>
+
+        <!-- Right Action Items (User Menu & Notifications) -->
+        <div class="hidden md:flex items-center gap-3">
+          <!-- Real-Time Chat Button -->
+          <button class="open-chat-trigger relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Messages & Peer Chat">
+            <i class="far fa-comments text-lg"></i>
+            <span class="chat-nav-badge hidden absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
+          </button>
+
+          <!-- Notification Bell -->
+          <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+
+          <!-- User Profile Dropdown -->
+          <div class="relative">
+            <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <i class="fas fa-chevron-down text-xs text-slate-400"></i>
+            </button>
+
+            <!-- Dropdown Menu -->
+            <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
+              <div class="px-4 py-2 border-b border-slate-100">
+                <p class="text-xs text-slate-400 font-medium">Signed in as</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
+                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+              </div>
+              <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
+              </a>
+              <a href="my-reports.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-clipboard-list w-4 text-slate-400"></i> My Reports
+              </a>
+              <a href="profile.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
+                <i class="fas fa-user-circle w-4 text-slate-400"></i> User Profile
+              </a>
+              <div class="border-t border-slate-100 my-1"></div>
+              <a href="login.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-rose-600 hover:bg-rose-50">
+                <i class="fas fa-sign-out-alt w-4"></i> Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Hamburger Button -->
+        <div class="flex md:hidden items-center gap-2">
+          <a href="notifications.html" class="p-2 text-slate-600 relative">
+            <i class="far fa-bell text-lg"></i>
+            <span class="notification-badge absolute top-1 right-1 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+          </a>
+          <button id="mobile-menu-btn" class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Menu -->
+    <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-2">
+      <a href="index.html" class="block px-3 py-2 rounded-lg text-base font-semibold text-indigo-600 bg-indigo-50">Home</a>
+      <a href="browse-items.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Browse Items</a>
+      <a href="report-lost.html" class="block px-3 py-2 rounded-lg text-base font-medium text-rose-600 hover:bg-rose-50">Report Lost Item</a>
+      <a href="report-found.html" class="block px-3 py-2 rounded-lg text-base font-medium text-emerald-600 hover:bg-emerald-50">Report Found Item</a>
+      <a href="dashboard.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Dashboard</a>
+      <a href="my-reports.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">My Reports</a>
+      <a href="profile.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Profile Settings</a>
+      <a href="contact.html" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50">Contact & Support</a>
+      <div class="border-t border-slate-200 pt-2 flex items-center justify-between">
+        <a href="login.html" class="text-sm font-semibold text-slate-600 hover:text-indigo-600">Login</a>
+        <a href="register.html" class="px-4 py-1.5 rounded-lg text-sm font-semibold bg-indigo-600 text-white">Register</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative bg-gradient-to-b from-indigo-50/70 via-white to-slate-50 py-16 lg:py-24 overflow-hidden">
+    <!-- Decorative background blobs -->
+    <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-indigo-300/20 blur-3xl rounded-full -z-10 pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      
+      <!-- Announcement badge -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-100/80 text-indigo-700 text-xs font-semibold mb-6">
+        <span class="flex h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+        Community Lost & Found Network — Over 1,400+ Possessions Returned Safely
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight max-w-4xl mx-auto leading-tight">
+        Reuniting Lost Possessions With Their <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Rightful Owners</span>
+      </h1>
+      <p class="mt-5 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto font-normal">
+        A fast, transparent, and secure campus & community platform to report, discover, match, and recover lost belongings with ease.
+      </p>
+
+      <!-- Quick Action CTA Buttons -->
+      <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+        <a href="map.html" class="px-6 py-3.5 rounded-xl bg-indigo-600 text-white font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <i class="fas fa-map-marked-alt"></i> Interactive Live Map
+        </a>
+        <a href="report-lost.html" class="px-6 py-3.5 rounded-xl bg-rose-600 text-white font-semibold shadow-lg shadow-rose-200 hover:bg-rose-700 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <i class="fas fa-search-plus"></i> I Lost Something
+        </a>
+        <a href="report-found.html" class="px-6 py-3.5 rounded-xl bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-200 hover:bg-emerald-700 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2">
+          <i class="fas fa-hand-holding-heart"></i> I Found Something
+        </a>
+        <a href="browse-items.html" class="px-6 py-3.5 rounded-xl bg-white text-slate-700 font-semibold border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center gap-2">
+          <i class="fas fa-list-ul"></i> Browse All
+        </a>
+      </div>
+
+      <!-- Interactive Search Bar Widget -->
+      <div class="mt-12 max-w-4xl mx-auto bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100">
+        <form action="browse-items.html" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
+          
+          <div class="sm:col-span-5 relative">
+            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" name="q" placeholder="What did you lose or find? (e.g. iPhone, Keys)" class="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+          </div>
+
+          <div class="sm:col-span-3">
+            <select name="category" class="w-full px-3 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <option value="">All Categories</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Wallets & Cards">Wallets & Cards</option>
+              <option value="Keys">Keys</option>
+              <option value="Bags & Luggage">Bags & Backpacks</option>
+              <option value="Books & Stationery">Books & Stationery</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <select name="type" class="w-full px-3 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <option value="all">All Types</option>
+              <option value="lost">Lost Only</option>
+              <option value="found">Found Only</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-2">
+            <button type="submit" class="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-1.5">
+              <span>Search</span>
+              <i class="fas fa-arrow-right text-xs"></i>
+            </button>
+          </div>
+
+        </form>
+
+        <div class="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs text-slate-500 pt-2 border-t border-slate-100">
+          <span class="font-medium text-slate-400">Trending searches:</span>
+          <a href="browse-items.html?q=AirPods" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">AirPods</a>
+          <a href="browse-items.html?q=Student+ID" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Student ID Card</a>
+          <a href="browse-items.html?q=Car+Keys" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Car Keys</a>
+          <a href="browse-items.html?q=Water+Bottle" class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Water Bottle</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Live Statistics Strip -->
+  <section class="border-y border-slate-200 bg-white py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div class="p-4">
+          <p class="text-3xl sm:text-4xl font-extrabold text-indigo-600">1,420+</p>
+          <p class="mt-1 text-sm font-medium text-slate-500">Items Returned</p>
+        </div>
+        <div class="p-4">
+          <p class="text-3xl sm:text-4xl font-extrabold text-emerald-600">89%</p>
+          <p class="mt-1 text-sm font-medium text-slate-500">Recovery Rate</p>
+        </div>
+        <div class="p-4">
+          <p class="text-3xl sm:text-4xl font-extrabold text-slate-800">48 hrs</p>
+          <p class="mt-1 text-sm font-medium text-slate-500">Avg. Recovery Time</p>
+        </div>
+        <div class="p-4">
+          <p class="text-3xl sm:text-4xl font-extrabold text-violet-600">12,500+</p>
+          <p class="mt-1 text-sm font-medium text-slate-500">Active Community Members</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Lost Items Section -->
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 uppercase tracking-wider bg-rose-50 px-2.5 py-1 rounded-md mb-2">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Urgent Assistance Needed
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Recently Lost Belongings</h2>
+          <p class="mt-1 text-slate-500 text-sm">Have you seen any of these items around campus or local transit?</p>
+        </div>
+        <a href="browse-items.html?type=lost" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors">
+          View all lost items <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+
+      <!-- Items Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Card 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=600&q=80" alt="iPhone 13" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+              LOST
+            </span>
+            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
+              Reward: $50
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Electronics</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">iPhone 13 (Midnight Blue)</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Lost in clear case with cat sticker on back. Tempered glass screen protector.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Library 2nd Floor Quiet Zone</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 30, 2026 (2 days ago)</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1001" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              View Details & Help
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80" alt="Leather Wallet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+              LOST
+            </span>
+            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
+              Reward: $25
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Wallets & Cards</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">Black Leather Bifold Wallet</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Contains student ID for Sarah J., driver license, and metro pass. Keep cash, need cards!</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Student Union Food Court</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 29, 2026</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1002" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              View Details & Help
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=600&q=80" alt="Calculator" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+              LOST
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Books & Stationery</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">Casio fx-991EX Scientific Calculator</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Left on desk row 3 after physics quiz. Has silver star sticker on sliding back cover.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Science Building Room 402</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 31, 2026 (Today)</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1003" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              View Details & Help
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80" alt="North Face Backpack" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+              LOST
+            </span>
+            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
+              Reward: $40
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Bags & Luggage</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">North Face Borealis Backpack</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Navy blue backpack with textbooks and lab notebooks inside. Vital for midterm exams.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Central Gym Locker Area</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 28, 2026</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1004" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              View Details & Help
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Recent Found Items Section -->
+  <section class="py-16 bg-white border-t border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div>
+          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-md mb-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Awaiting Rightful Owner
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Found Belongings</h2>
+          <p class="mt-1 text-slate-500 text-sm">Did you misplace something recently? Check if it was safely handed over.</p>
+        </div>
+        <a href="browse-items.html?type=found" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+          View all found items <i class="fas fa-arrow-right text-xs"></i>
+        </a>
+      </div>
+
+      <!-- Items Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Found Card 1 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" alt="Headphones" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
+              FOUND
+            </span>
+            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
+              In Security Custody
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Electronics</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Sony WH-1000XM4 Headphones</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Black over-ear wireless headphones with zippered travel case found on sofa.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">Student Lounge Vending Area</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 31, 2026 (Today)</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1005" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              Claim This Item
+            </a>
+          </div>
+        </div>
+
+        <!-- Found Card 2 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" alt="Car Keys" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
+              FOUND
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Keys</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Subaru Key Fob with Carabiner</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Ring of 4 keys with red anodized carabiner and small silver bottle opener.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">West Parking Lot B</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 30, 2026</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1006" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              Claim This Item
+            </a>
+          </div>
+        </div>
+
+        <!-- Found Card 3 -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80" alt="Hydro Flask" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
+              FOUND
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Accessories</div>
+            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Hydro Flask 32oz Tumbler</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Cobalt blue bottle covered with outdoor stickers (NASA, Yosemite, GitHub).</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">CS Building Lab 105</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 29, 2026</span></div>
+            </div>
+            <a href="item-details.html?id=LF-1007" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
+              Claim This Item
+            </a>
+          </div>
+        </div>
+
+        <!-- Found Card 4 (Returned Success) -->
+        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col opacity-90">
+          <div class="relative h-48 overflow-hidden bg-slate-100">
+            <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80" alt="Sunglasses" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-white shadow-sm flex items-center gap-1">
+              <i class="fas fa-check text-[10px]"></i> RETURNED
+            </span>
+          </div>
+          <div class="p-5 flex flex-col flex-grow">
+            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Accessories</div>
+            <h3 class="font-bold text-slate-700 text-base line-clamp-1">Ray-Ban Aviator Sunglasses</h3>
+            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Gold frame in original brown leather case. Successfully verified and reunited with owner.</p>
+            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-slate-400 w-3.5"></i> <span class="truncate">Engineering Quad Lawn</span></div>
+              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Reunited Oct 28</span></div>
+            </div>
+            <span class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-500 font-semibold text-xs text-center">
+              Successfully Resolved
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="py-20 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Simple & Secure Process</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3">How FinderSpot Operates</h2>
+        <p class="text-slate-600 mt-3 text-base">We bridge the gap between people who lost items and kind Samaritans or campus security who found them.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        <!-- Step 1 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm relative">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 font-extrabold text-xl flex items-center justify-center mb-5">
+            1
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Publish a Report</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Fill in detailed description, photos, location, and a private verification question within seconds.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm relative">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 font-extrabold text-xl flex items-center justify-center mb-5">
+            2
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Instant Smart Matching</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Our system scans listings to discover matching reports based on category, date, and description keywords.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm relative">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 font-extrabold text-xl flex items-center justify-center mb-5">
+            3
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Verification & Claim</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Owners answer confidential security questions or provide serial proof to eliminate false claims.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm relative">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 font-extrabold text-xl flex items-center justify-center mb-5">
+            <i class="fas fa-check"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2">Safe Handover</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">
+            Arrange pickup via designated campus security desks, front offices, or safe exchange zones.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Community CTA Banner -->
+  <section class="bg-indigo-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Have You Lost Something on Campus?</h2>
+      <p class="mt-4 text-indigo-100 max-w-2xl mx-auto text-base sm:text-lg">
+        Don't panic! Over 80% of lost belongings registered within 48 hours are safely retrieved. Submit your report now.
+      </p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="report-lost.html" class="px-7 py-3.5 bg-white text-indigo-600 hover:bg-indigo-50 font-bold rounded-xl shadow-lg transition-all">
+          Report Lost Item Now
+        </a>
+        <a href="contact.html" class="px-7 py-3.5 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold rounded-xl border border-indigo-500 transition-all">
+          Contact Lost & Found Desk
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Site Footer -->
+  <footer class="bg-slate-900 text-slate-300 pt-16 pb-12 border-t border-slate-800 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        
+        <!-- Brand Info -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold">
+              <i class="fas fa-search-location"></i>
+            </div>
+            <span class="text-xl font-extrabold text-white">Finder<span class="text-indigo-400">Spot</span></span>
+          </div>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            The university and community lost-and-found management platform designed to reunite owners with their missing items safely and rapidly.
+          </p>
+          <div class="flex items-center gap-3 pt-2">
+            <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-600 text-slate-400 hover:text-white flex items-center justify-center transition-colors"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Quick Navigation</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="index.html" class="hover:text-indigo-400 transition-colors">Home</a></li>
+            <li><a href="browse-items.html" class="hover:text-indigo-400 transition-colors">Browse All Items</a></li>
+            <li><a href="report-lost.html" class="hover:text-indigo-400 transition-colors">Report Lost Belonging</a></li>
+            <li><a href="report-found.html" class="hover:text-indigo-400 transition-colors">Report Found Property</a></li>
+            <li><a href="dashboard.html" class="hover:text-indigo-400 transition-colors">User Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Categories -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Popular Categories</h4>
+          <ul class="space-y-2.5 text-sm">
+            <li><a href="browse-items.html?category=Electronics" class="hover:text-indigo-400 transition-colors">Electronics & Laptops</a></li>
+            <li><a href="browse-items.html?category=Wallets" class="hover:text-indigo-400 transition-colors">Wallets & Student IDs</a></li>
+            <li><a href="browse-items.html?category=Keys" class="hover:text-indigo-400 transition-colors">Keys & Access Cards</a></li>
+            <li><a href="browse-items.html?category=Bags" class="hover:text-indigo-400 transition-colors">Backpacks & Handbags</a></li>
+            <li><a href="browse-items.html?category=Accessories" class="hover:text-indigo-400 transition-colors">Eyewear & Accessories</a></li>
+          </ul>
+        </div>
+
+        <!-- Support & Desk -->
+        <div>
+          <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-4">Central Desk</h4>
+          <p class="text-sm text-slate-400 mb-3">Campus Student Center, Room 104</p>
+          <p class="text-sm text-slate-400 mb-1"><i class="fas fa-phone-alt text-indigo-400 mr-2"></i> +1 (555) 019-2831</p>
+          <p class="text-sm text-slate-400 mb-4"><i class="fas fa-envelope text-indigo-400 mr-2"></i> lostfound@campus.edu</p>
+          <a href="contact.html" class="inline-block px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white transition-colors">
+            Support Desk & FAQs
+          </a>
+        </div>
+
+      </div>
+
+      <div class="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <p>&copy; 2026 FinderSpot Platform. All rights reserved.</p>
+        <div class="flex items-center gap-6">
+          <a href="#" class="hover:text-slate-400 transition-colors">Privacy Policy</a>
+          <a href="#" class="hover:text-slate-400 transition-colors">Terms of Service</a>
+          <a href="#" class="hover:text-slate-400 transition-colors">Safety Guidelines</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

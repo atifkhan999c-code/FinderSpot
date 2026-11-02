@@ -1,0 +1,21 @@
+# Dependencies
+node_modules
+*/node_modules
+npm-debug.log*
+
+# Git repository files
+.git
+.gitignore
+
+# Environment & Local Secrets
+.env
+backend/.env
+
+# Local Logs & Uploads (Handled by Docker Volume)
+*.log
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Operating system files
+.DS_Store
+Thumbs.db
