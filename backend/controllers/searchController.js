@@ -1,5 +1,7 @@
+const mongoose = require('mongoose');
 const LostItem = require('../models/LostItem');
 const FoundItem = require('../models/FoundItem');
+const { MOCK_LOST_ITEMS, MOCK_FOUND_ITEMS } = require('../data/mockData');
 const {
   DEFAULT_CAMPUS_CENTER,
   CAMPUS_LANDMARKS,
@@ -15,6 +17,15 @@ const {
  */
 const searchAllItems = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const all = [...MOCK_LOST_ITEMS, ...MOCK_FOUND_ITEMS];
+      return res.status(200).json({
+        success: true,
+        totalCount: all.length,
+        data: all,
+      });
+    }
+
     const { q, type, category, status, sort } = req.query;
 
     let baseFilter = {};
@@ -92,6 +103,21 @@ const searchAllItems = async (req, res) => {
  */
 const getMapItems = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const all = [...MOCK_LOST_ITEMS, ...MOCK_FOUND_ITEMS].map((item) => ({
+        ...item,
+        distanceMeters: 250,
+        distanceText: '250 m away',
+      }));
+      return res.status(200).json({
+        success: true,
+        center: { lat: 40.7295, lng: -73.9965, name: 'Campus Center Plaza' },
+        radiusMeters: 5000,
+        totalCount: all.length,
+        data: all,
+      });
+    }
+
     const {
       lat,
       lng,

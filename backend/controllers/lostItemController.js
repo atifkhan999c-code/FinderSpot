@@ -1,8 +1,10 @@
+const mongoose = require('mongoose');
 const LostItem = require('../models/LostItem');
 const FoundItem = require('../models/FoundItem');
 const Notification = require('../models/Notification');
 const { emitMatchAlert, broadcast } = require('../services/socketService');
 const EmailService = require('../services/emailService');
+const { MOCK_LOST_ITEMS } = require('../data/mockData');
 
 /**
  * @desc    Create a new lost item report
@@ -130,6 +132,14 @@ const createLostItem = async (req, res) => {
  */
 const getAllLostItems = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(200).json({
+        success: true,
+        count: MOCK_LOST_ITEMS.length,
+        data: MOCK_LOST_ITEMS,
+      });
+    }
+
     const { category, status, sort, q } = req.query;
     let query = {};
 
@@ -178,6 +188,11 @@ const getAllLostItems = async (req, res) => {
  */
 const getLostItemById = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const mock = MOCK_LOST_ITEMS.find((i) => i._id === req.params.id) || MOCK_LOST_ITEMS[0];
+      return res.status(200).json({ success: true, data: mock });
+    }
+
     const item = await LostItem.findById(req.params.id);
 
     if (!item) {
