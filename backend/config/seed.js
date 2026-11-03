@@ -21,7 +21,7 @@ const Message = require('../models/Message');
 
 const seedDatabase = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/lost_and_found_db';
+    const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lost_and_found_db';
     console.log(`⏳ Connecting to MongoDB at: ${mongoUri}`);
     await mongoose.connect(mongoUri);
     console.log('✅ Connected to MongoDB successfully.');

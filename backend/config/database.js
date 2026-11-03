@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
  * Connect to MongoDB database
  */
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
   const isProduction = process.env.NODE_ENV === 'production';
 
   // If running in production on Render and no cloud URI is provided, run in Standalone/Demo mode
