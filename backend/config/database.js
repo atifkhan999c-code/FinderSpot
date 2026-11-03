@@ -4,7 +4,35 @@ const mongoose = require('mongoose');
  * Connect to MongoDB database
  */
 const connectDB = async () => {
-  const uri = process.env.MONGO_URI || process.env.MONGODB_URI;
+  let uri =
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URL ||
+    process.env.MONGODB_URL ||
+    process.env.DATABASE_URL;
+
+  // Auto-detect ANY environment variable matching mongo/mongodb or containing a mongodb connection string
+  if (!uri) {
+    for (const [key, val] of Object.entries(process.env)) {
+      if (typeof val === 'string' && (val.startsWith('mongodb+srv://') || val.startsWith('mongodb://'))) {
+        console.log(`📡 Auto-detected MongoDB connection string from environment variable: "${key}"`);
+        uri = val;
+        break;
+      }
+    }
+  }
+
+  // Also check keys case-insensitively (e.g. "Monogo uri", "mongo uri", "MONGODB")
+  if (!uri) {
+    for (const [key, val] of Object.entries(process.env)) {
+      if (key.toLowerCase().includes('mongo') && typeof val === 'string' && val.trim().length > 0) {
+        console.log(`📡 Auto-detected MongoDB key from environment variable: "${key}"`);
+        uri = val.trim();
+        break;
+      }
+    }
+  }
+
   const isProduction = process.env.NODE_ENV === 'production';
 
   // If running in production on Render and no cloud URI is provided, run in Standalone/Demo mode
