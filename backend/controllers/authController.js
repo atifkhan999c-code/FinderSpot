@@ -41,13 +41,20 @@ const registerUser = async (req, res) => {
       });
     }
 
+    // Restrict public registration roles to prevent unauthorized privilege escalation
+    const allowedPublicRoles = ['Student', 'Faculty', 'Staff', 'General Public'];
+    let assignedRole = 'Student';
+    if (role && allowedPublicRoles.includes(role)) {
+      assignedRole = role;
+    }
+
     // Create user
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       password,
       phone: phone || '',
-      role: role || 'Student',
+      role: assignedRole,
       studentId: studentId || '',
       department: department || '',
     });

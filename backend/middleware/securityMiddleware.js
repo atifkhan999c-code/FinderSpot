@@ -22,7 +22,7 @@ const apiLimiter = rateLimit({
  */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 15,
+  max: process.env.NODE_ENV === 'production' ? 30 : 150,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -33,11 +33,11 @@ const authLimiter = rateLimit({
 
 /**
  * Anti-Spam Rate Limiter for Submitting Reports & Claims
- * Limits report and claim submissions to 25 per 15-minute window per IP
+ * Limits report and claim submissions per 15-minute window per IP
  */
 const submissionLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 25,
+  max: process.env.NODE_ENV === 'production' ? 50 : 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: {

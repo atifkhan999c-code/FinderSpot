@@ -6,10 +6,11 @@ const {
   updateClaimStatus,
 } = require('../controllers/claimController');
 const { protect, optionalAuth } = require('../middleware/authMiddleware');
+const { submissionLimiter } = require('../middleware/securityMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
 // Submit a new ownership verification claim
-router.post('/', optionalAuth, upload.single('proofImage'), submitClaim);
+router.post('/', submissionLimiter, optionalAuth, upload.single('proofImage'), submitClaim);
 
 // Get all claims filed for a specific item
 router.get('/item/:itemId', protect, getClaimsForItem);

@@ -40,12 +40,11 @@ const createLostItem = async (req, res) => {
       locationPoint = { type: 'Point', coordinates: [reqLng, reqLat] };
     }
 
-    const lostItem = await LostItem.create({
+    const itemData = {
       title,
       category,
       location,
       coordinates,
-      locationPoint,
       date: date || new Date(),
       time: time || '',
       reward: reward || '',
@@ -58,7 +57,12 @@ const createLostItem = async (req, res) => {
       reporterEmail: req.user ? req.user.email : (req.body.reporterEmail || ''),
       reporterPhone: req.user ? req.user.phone : (req.body.reporterPhone || ''),
       tags: typeof tags === 'string' ? tags.split(',').map((t) => t.trim()) : tags,
-    });
+    };
+    if (locationPoint) {
+      itemData.locationPoint = locationPoint;
+    }
+
+    const lostItem = await LostItem.create(itemData);
 
     // Check for potential matches in FoundItem collection
     const potentialMatches = await FoundItem.find({
@@ -117,6 +121,13 @@ const createLostItem = async (req, res) => {
       data: lostItem,
     });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((e) => e.message).join(', ');
+      return res.status(400).json({
+        success: false,
+        message: messages,
+      });
+    }
     console.error('Create Lost Item Error:', error);
     res.status(500).json({
       success: false,
@@ -154,10 +165,11 @@ const getAllLostItems = async (req, res) => {
     }
 
     if (q) {
+      const safeQ = String(q).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { title: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } },
-        { location: { $regex: q, $options: 'i' } },
+        { title: { $regex: safeQ, $options: 'i' } },
+        { description: { $regex: safeQ, $options: 'i' } },
+        { location: { $regex: safeQ, $options: 'i' } },
       ];
     }
 
@@ -188,6 +200,13 @@ const getAllLostItems = async (req, res) => {
  */
 const getLostItemById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Lost item report not found',
+      });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       const mock = MOCK_LOST_ITEMS.find((i) => i._id === req.params.id) || MOCK_LOST_ITEMS[0];
       return res.status(200).json({ success: true, data: mock });
@@ -207,6 +226,12 @@ const getLostItemById = async (req, res) => {
       data: item,
     });
   } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(404).json({
+        success: false,
+        message: 'Lost item report not found',
+      });
+    }
     res.status(500).json({
       success: false,
       message: error.message,
@@ -227,6 +252,16 @@ const updateLostItem = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Lost item not found',
+      });
+    }
+
+    // Verify ownership or administrative authorization
+    const isOwner = item.reporter && item.reporter.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this lost item report',
       });
     }
 
@@ -265,6 +300,16 @@ const deleteLostItem = async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Lost item not found',
+      });
+    }
+
+    // Verify ownership or administrative authorization
+    const isOwner = item.reporter && item.reporter.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this lost item report',
       });
     }
 

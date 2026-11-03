@@ -7,10 +7,11 @@ const {
   updateUserProfile,
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
+const { authLimiter } = require('../middleware/securityMiddleware');
 
-// Public routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
+// Public routes with brute force rate limiting
+router.post('/register', authLimiter, registerUser);
+router.post('/login', authLimiter, loginUser);
 
 // Protected routes
 router.get('/profile', protect, getUserProfile);

@@ -33,6 +33,17 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Input sanitization against Stored XSS
+const { sanitizeObject } = require('./utils/sanitize');
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    const originalPassword = req.body.password;
+    sanitizeObject(req.body);
+    if (originalPassword) req.body.password = originalPassword;
+  }
+  next();
+});
+
 // 3. Static Assets Serving
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, '..', 'frontend')));
@@ -55,11 +66,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 6. Mount Routes with Targeted Rate Limiters
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/lost-items', submissionLimiter, lostItemRoutes);
-app.use('/api/found-items', submissionLimiter, foundItemRoutes);
-app.use('/api/claims', submissionLimiter, claimRoutes);
+// 6. Mount Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/lost-items', lostItemRoutes);
+app.use('/api/found-items', foundItemRoutes);
+app.use('/api/claims', claimRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);

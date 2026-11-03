@@ -140,6 +140,19 @@ const updateClaimStatus = async (req, res) => {
       });
     }
 
+    // Verify caller is the item custodian/reporter or Admin/Security
+    const Model = claim.itemModel === 'LostItem' ? LostItem : FoundItem;
+    const targetItem = await Model.findById(claim.item);
+    const isCustodian = targetItem && targetItem.reporter && targetItem.reporter.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+
+    if (!isCustodian && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to approve or reject this claim',
+      });
+    }
+
     claim.status = status;
     if (reviewerNotes) claim.reviewerNotes = reviewerNotes;
     await claim.save();

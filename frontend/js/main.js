@@ -303,6 +303,15 @@ const FinderApp = {
     });
   },
 
+  logout() {
+    localStorage.removeItem('lf_jwt_token');
+    localStorage.removeItem('lf_user_session');
+    if (window.socket && typeof window.socket.disconnect === 'function') {
+      window.socket.disconnect();
+    }
+    window.location.href = 'login.html';
+  },
+
   initCommon() {
     this.updateUserUI();
     const btn = document.getElementById('user-menu-btn');
@@ -314,6 +323,17 @@ const FinderApp = {
       });
       document.addEventListener('click', () => menu.classList.add('hidden'));
     }
+
+    // Global listener for Sign Out / Logout links
+    document.querySelectorAll('a, button').forEach((el) => {
+      const text = (el.textContent || '').trim().toLowerCase();
+      if (text === 'sign out' || text === 'logout' || el.classList.contains('logout-btn')) {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.logout();
+        });
+      }
+    });
   }
 };
 

@@ -539,7 +539,7 @@
           <tr class="hover:bg-slate-50 transition-colors">
             <td class="py-3 px-4">
               <div class="flex items-center gap-3">
-                <img src="${item.image || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=100&q=80'}" class="w-9 h-9 rounded-lg object-cover border border-slate-200">
+                <img src="${item.image || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=100&q=80'}" alt="${item.title || 'Item thumbnail'}" class="w-9 h-9 rounded-lg object-cover border border-slate-200">
                 <div>
                   <p class="font-bold text-slate-900">${item.title}</p>
                   <span class="text-[10px] text-slate-400">#${item.id || item._id}</span>
@@ -659,7 +659,7 @@
           tbody.innerHTML = res.data.map(u => `
             <tr class="hover:bg-slate-50 transition-colors">
               <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
-                <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" class="w-7 h-7 rounded-full object-cover">
+                <img src="${u.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'}" alt="${u.name || 'User avatar'}" class="w-7 h-7 rounded-full object-cover">
                 ${u.name}
               </td>
               <td class="py-3 px-4 text-slate-600">${u.email}</td>

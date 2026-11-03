@@ -41,11 +41,12 @@ const searchAllItems = async (req, res) => {
     }
 
     if (q) {
+      const safeQ = String(q).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       baseFilter.$or = [
-        { title: { $regex: q, $options: 'i' } },
-        { description: { $regex: q, $options: 'i' } },
-        { location: { $regex: q, $options: 'i' } },
-        { tags: { $regex: q, $options: 'i' } },
+        { title: { $regex: safeQ, $options: 'i' } },
+        { description: { $regex: safeQ, $options: 'i' } },
+        { location: { $regex: safeQ, $options: 'i' } },
+        { tags: { $regex: safeQ, $options: 'i' } },
       ];
     }
 

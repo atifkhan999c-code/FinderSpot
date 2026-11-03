@@ -9,13 +9,14 @@ const {
   getMyLostItems,
 } = require('../controllers/lostItemController');
 const { protect, optionalAuth } = require('../middleware/authMiddleware');
+const { submissionLimiter } = require('../middleware/securityMiddleware');
 const upload = require('../services/uploadService');
 
 // Get all lost items / create new report
 router
   .route('/')
   .get(getAllLostItems)
-  .post(optionalAuth, upload.single('image'), createLostItem);
+  .post(submissionLimiter, optionalAuth, upload.single('image'), createLostItem);
 
 // Logged-in user's own reported lost items
 router.get('/my-reports', protect, getMyLostItems);
