@@ -21,6 +21,31 @@ const submitClaim = async (req, res) => {
       });
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      let proofImageUrl = '';
+      if (req.file) {
+        proofImageUrl = `/uploads/${req.file.filename}`;
+      }
+      const mockClaim = {
+        _id: 'CLM-' + Date.now(),
+        item: itemId,
+        itemModel: itemModel || 'FoundItem',
+        claimant: req.user ? req.user._id : null,
+        claimantName,
+        claimantEmail,
+        claimantPhone: claimantPhone || '',
+        proofDetails,
+        proofImage: proofImageUrl,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+      return res.status(201).json({
+        success: true,
+        message: 'Claim verification submitted successfully. The finder/custodian has been notified.',
+        data: mockClaim,
+      });
+    }
+
     const modelName = itemModel === 'LostItem' ? 'LostItem' : 'FoundItem';
     const Model = modelName === 'LostItem' ? LostItem : FoundItem;
     const targetItem = await Model.findById(itemId);

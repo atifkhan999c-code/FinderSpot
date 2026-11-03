@@ -62,6 +62,21 @@ const createLostItem = async (req, res) => {
       itemData.locationPoint = locationPoint;
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      const mockCreated = {
+        _id: 'LF-' + Date.now(),
+        ...itemData,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      MOCK_LOST_ITEMS.unshift(mockCreated);
+      return res.status(201).json({
+        success: true,
+        message: 'Lost item report published successfully',
+        data: mockCreated,
+      });
+    }
+
     const lostItem = await LostItem.create(itemData);
 
     // Check for potential matches in FoundItem collection

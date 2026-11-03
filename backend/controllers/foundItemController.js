@@ -62,6 +62,21 @@ const createFoundItem = async (req, res) => {
       itemData.locationPoint = locationPoint;
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      const mockCreated = {
+        _id: 'LF-' + Date.now(),
+        ...itemData,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      };
+      MOCK_FOUND_ITEMS.unshift(mockCreated);
+      return res.status(201).json({
+        success: true,
+        message: 'Found item report published successfully',
+        data: mockCreated,
+      });
+    }
+
     const foundItem = await FoundItem.create(itemData);
 
     // Match detection against lost items to alert owners

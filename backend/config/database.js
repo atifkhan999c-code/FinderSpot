@@ -35,11 +35,12 @@ const connectDB = async () => {
 
   const isProduction = process.env.NODE_ENV === 'production';
 
-  // If running in production on Render and no cloud URI is provided, run in Standalone/Demo mode
-  if (isProduction && (!uri || uri.includes('127.0.0.1') || uri.includes('localhost'))) {
-    console.log('☁️ [FinderSpot] Production Cloud Mode: Running in Demo Mode (Local Storage & Heuristics active).');
-    console.log('💡 Tip: Set MONGO_URI in Render dashboard whenever you want to connect a cloud MongoDB database.');
-    return;
+  // If running in production and no URI found in env, use verified Atlas cluster
+  const DEFAULT_ATLAS_URI =
+    'mongodb+srv://atifkhan999c_db_user:Atifkhan1234@cluster0.ztmgtbw.mongodb.net/lost_and_found_db?retryWrites=true&w=majority';
+  if (!uri && isProduction) {
+    console.log('📡 Using verified MongoDB Atlas Cluster URI for cloud production deployment.');
+    uri = DEFAULT_ATLAS_URI;
   }
 
   try {
