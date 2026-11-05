@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Claim = require('../models/Claim');
 const FoundItem = require('../models/FoundItem');
 const LostItem = require('../models/LostItem');
