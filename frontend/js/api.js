@@ -194,8 +194,9 @@ const API = {
       });
     },
 
-    async getForItem(itemId) {
-      return await API.request(`/claims/item/${itemId}`);
+    async getForItem(itemId, itemModel = '') {
+      const qs = itemModel ? `?itemModel=${encodeURIComponent(itemModel)}` : '';
+      return await API.request(`/claims/item/${itemId}${qs}`);
     },
 
     async updateStatus(claimId, status, notes = '') {

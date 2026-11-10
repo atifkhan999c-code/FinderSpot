@@ -66,21 +66,21 @@
 
           <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
             <i class="far fa-bell text-lg"></i>
-            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+            <span class="notification-badge hidden absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
           </a>
 
           <!-- User Profile Dropdown -->
           <div class="relative">
             <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
-              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
-              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Member">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Member</span>
               <i class="fas fa-chevron-down text-xs text-slate-400"></i>
             </button>
             <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
               <div class="px-4 py-2 border-b border-slate-100">
                 <p class="text-xs text-slate-400 font-medium">Signed in as</p>
-                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
-                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Member</p>
+                <p class="user-display-email text-xs text-indigo-600 truncate"></p>
               </div>
               <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
                 <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
@@ -318,11 +318,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Your Name</label>
-            <input type="text" id="claimant-name" value="Alex" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
+            <input type="text" id="claimant-name" placeholder="Your full name" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
-            <input type="tel" id="claimant-phone" value="+1 (555) 234-5678" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
+            <input type="tel" id="claimant-phone" placeholder="Your phone number" class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm">
           </div>
         </div>
 
@@ -385,11 +385,42 @@
   </footer>
 
   <script>
+    function escapeHtml(val) {
+      return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showNotice(msg, type = 'success') {
+      if (window.LFApp && typeof window.LFApp.showToast === 'function') {
+        window.LFApp.showToast(msg, type);
+      } else {
+        const el = document.createElement('div');
+        const bg = type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : type === 'info' ? '#3b82f6' : '#10b981';
+        el.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:999999;background:${bg};color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:13px;box-shadow:0 10px 25px rgba(0,0,0,0.2);`;
+        el.textContent = msg;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 3500);
+      }
+    }
+
     // Extract Item ID and Type from URL
     const urlParams = new URLSearchParams(window.location.search);
-    const itemId = urlParams.get('id') || 'LF-1001';
-    const itemType = urlParams.get('type') || 'lost';
+    const itemId = urlParams.get('id');
+    const explicitType = urlParams.get('type');
+    let itemType = explicitType === 'found' ? 'found' : 'lost';
     let currentItem = null;
+
+    function getSessionUser() {
+      try {
+        return JSON.parse(localStorage.getItem('lf_user_session') || 'null');
+      } catch (e) {
+        return null;
+      }
+    }
 
     function renderDetails(item) {
       if (!item) return;
@@ -404,7 +435,6 @@
       document.getElementById('detail-reporter-name').textContent = item.reporterName || 'Campus Community Member';
       document.getElementById('detail-image').src = item.image;
 
-      // Badges
       const typeBadge = document.getElementById('detail-type-badge');
       const rewardTag = document.getElementById('detail-reward-tag');
       const statusBadge = document.getElementById('detail-status-badge');
@@ -426,9 +456,10 @@
 
       if (item.status === 'returned') {
         statusBadge.classList.remove('hidden');
+      } else {
+        statusBadge.classList.add('hidden');
       }
 
-      // Security Question
       const secBox = document.getElementById('detail-security-box');
       const secQ = document.getElementById('detail-security-question');
       const modalSecQ = document.getElementById('modal-security-question');
@@ -443,76 +474,118 @@
       loadSimilarItems();
     }
 
+    function mapApiItem(d, type) {
+      return {
+        id: d._id || d.id,
+        title: d.title,
+        type,
+        category: d.category,
+        location: d.location,
+        date: d.date ? String(d.date).split('T')[0] : 'Recent',
+        time: d.time || '',
+        reward: d.reward || '',
+        status: d.status || 'active',
+        description: d.description,
+        image:
+          d.image ||
+          (type === 'lost'
+            ? 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80'
+            : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'),
+        reporter: d.reporter,
+        reporterName: (d.reporter && d.reporter.name) || d.reporterName || 'Campus Community Member',
+        securityQuestion: d.securityQuestion || '',
+      };
+    }
+
     async function loadItemDetails() {
-      // 1. Try Local Storage first
-      if (typeof LFApp !== 'undefined') {
-        currentItem = LFApp.getItemById(itemId);
+      if (!itemId) {
+        document.getElementById('detail-title').textContent = 'No Item Selected';
+        document.getElementById('detail-desc').textContent = 'Please select an item from Browse Items or My Reports to view details.';
+        return;
       }
 
-      // 2. If not found in local storage, query live MongoDB REST API
-      if (!currentItem && window.API) {
-        try {
-          const type = urlParams.get('type') || itemType;
-          const fetchPromise = type === 'lost' ? window.API.items.getLostById(itemId) : window.API.items.getFoundById(itemId);
-          const res = await fetchPromise;
-          if (res && res.data) {
-            const d = res.data;
-            currentItem = {
-              id: d._id,
-              title: d.title,
-              type: type,
-              category: d.category,
-              location: d.location,
-              date: d.date ? d.date.split('T')[0] : 'Recent',
-              time: d.time || '',
-              reward: d.reward || '',
-              status: d.status || 'active',
-              description: d.description,
-              image: d.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80',
-              reporter: d.reporter,
-              reporterName: (d.reporter && d.reporter.name) || d.reporterName || 'Campus Community Member',
-              securityQuestion: d.securityQuestion || ''
-            };
+      if (window.API && window.API.getToken()) {
+        const order = explicitType ? [itemType] : ['lost', 'found'];
+        for (const t of order) {
+          try {
+            const res = t === 'lost' ? await window.API.items.getLostById(itemId) : await window.API.items.getFoundById(itemId);
+            if (res && res.data) {
+              itemType = t;
+              currentItem = mapApiItem(res.data, t);
+              break;
+            }
+          } catch (err) {
+            // Try next collection if explicitType wasn't provided
           }
-        } catch (err) {
-          console.warn('API detail lookup failed:', err);
         }
       }
 
-      // 3. Fallback to first available local item if still not found
-      if (!currentItem && typeof LFApp !== 'undefined') {
-        const all = LFApp.getItems();
-        currentItem = all[0];
+      if (!currentItem) {
+        try {
+          const cached = JSON.parse(localStorage.getItem('lf_items_data') || '[]');
+          currentItem = cached.find((i) => String(i.id) === String(itemId)) || null;
+        } catch (e) {}
       }
 
       if (currentItem) {
         renderDetails(currentItem);
+      } else {
+        document.getElementById('detail-title').textContent = 'Item Report Not Found';
+        document.getElementById('detail-desc').textContent = 'This item report may have been deleted or does not exist.';
       }
     }
 
-    function loadSimilarItems() {
-      const all = LFApp.getItems();
-      const similar = all.filter(i => i.id !== currentItem.id).slice(0, 3);
+    async function loadSimilarItems() {
       const container = document.getElementById('similar-items-grid');
-      
-      container.innerHTML = similar.map(item => `
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col">
-          <div class="relative h-40 overflow-hidden bg-slate-100">
-            <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
-            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}">
-              ${item.type.toUpperCase()}
-            </span>
-          </div>
-          <div class="p-4 flex flex-col flex-grow">
-            <span class="text-[10px] font-bold text-slate-400 uppercase">${item.category}</span>
-            <h4 class="font-bold text-slate-800 text-sm mt-0.5 line-clamp-1">${item.title}</h4>
-            <p class="text-xs text-slate-500 mt-1 line-clamp-1"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${item.location}</p>
-            <a href="item-details.html?id=${item.id}" class="mt-3 block text-center py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-600 hover:text-white text-xs font-semibold text-slate-700 transition-colors">
-              View Item
-            </a>
-          </div>
-        </div>
-      `).join('');
+      if (!container || !currentItem) return;
+
+      let pool = [];
+      try {
+        if (window.API && window.API.getToken()) {
+          const res = await window.API.items.search({ category: currentItem.category });
+          pool = (res && res.data) || [];
+        }
+      } catch (e) {}
+
+      if (pool.length === 0) {
+        try {
+          pool = JSON.parse(localStorage.getItem('lf_items_data') || '[]');
+        } catch (e) {}
+      }
+
+      const similar = pool
+        .filter((i) => String(i._id || i.id) !== String(currentItem.id) || i.type !== currentItem.type)
+        .slice(0, 3);
+
+      if (similar.length === 0) {
+        container.innerHTML = '<div class="col-span-full text-center py-6 text-xs text-slate-400">No similar items in this category yet.</div>';
+        return;
+      }
+
+      container.innerHTML = similar
+        .map((item) => {
+          const sid = item._id || item.id;
+          const sType = item.type === 'found' ? 'found' : 'lost';
+          return `
+            <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col">
+              <div class="relative h-40 overflow-hidden bg-slate-100">
+                <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" class="w-full h-full object-cover">
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${sType === 'lost' ? 'bg-rose-600 text-white' : 'bg-emerald-600 text-white'}">
+                  ${sType.toUpperCase()}
+                </span>
+              </div>
+              <div class="p-4 flex flex-col flex-grow">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">${escapeHtml(item.category)}</span>
+                <h4 class="font-bold text-slate-800 text-sm mt-0.5 line-clamp-1">${escapeHtml(item.title)}</h4>
+                <p class="text-xs text-slate-500 mt-1 line-clamp-1"><i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${escapeHtml(item.location)}</p>
+                <a href="item-details.html?id=${encodeURIComponent(sid)}&type=${sType}" class="mt-3 block text-center py-1.5 rounded-lg bg-slate-100 hover:bg-indigo-600 hover:text-white text-xs font-semibold text-slate-700 transition-colors">
+                  View Item
+                </a>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
     }
 
     // Modal Handlers
@@ -527,34 +600,82 @@
     if (tipBtn) tipBtn.addEventListener('click', () => tipModal.classList.remove('hidden'));
 
     // Claim Submission
-    document.getElementById('claim-form').addEventListener('submit', function(e) {
+    document.getElementById('claim-form').addEventListener('submit', async function (e) {
       e.preventDefault();
-      const proof = document.getElementById('claim-proof').value;
-      const name = document.getElementById('claimant-name').value;
-      const phone = document.getElementById('claimant-phone').value;
-
-      if (typeof LFApp !== 'undefined') {
-        LFApp.submitClaim({
-          itemId: currentItem ? currentItem.id : itemId,
-          name: name,
-          phone: phone,
-          proofDetails: proof
-        });
-        LFApp.showToast('Claim submitted! The reporter and campus desk have been notified.', 'success');
+      if (!currentItem) {
+        showNotice('Item details not loaded yet.', 'error');
+        return;
       }
-      claimModal.classList.add('hidden');
-      document.getElementById('claim-proof').value = '';
+
+      const proof = document.getElementById('claim-proof').value.trim();
+      const name = document.getElementById('claimant-name').value.trim();
+      const phone = document.getElementById('claimant-phone').value.trim();
+      const user = getSessionUser() || {};
+
+      const submitBtn = this.querySelector('button[type="submit"]');
+      const originalHtml = submitBtn ? submitBtn.innerHTML : 'Submit Claim Verification';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Submitting...';
+      }
+
+      try {
+        await window.API.claims.submit({
+          itemId: currentItem.id,
+          itemModel: currentItem.type === 'lost' ? 'LostItem' : 'FoundItem',
+          claimantName: name || user.name || 'Campus Member',
+          claimantEmail: user.email || 'member@campus.edu',
+          claimantPhone: phone,
+          proofDetails: proof,
+        });
+        showNotice('Claim submitted! The reporter and campus desk have been notified.', 'success');
+        claimModal.classList.add('hidden');
+        document.getElementById('claim-proof').value = '';
+      } catch (err) {
+        showNotice(err.message || 'Failed to submit claim.', 'error');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalHtml;
+        }
+      }
     });
 
     // Tip Submission
-    document.getElementById('tip-form').addEventListener('submit', function(e) {
+    document.getElementById('tip-form').addEventListener('submit', async function (e) {
       e.preventDefault();
-      LFApp.showToast('Your message has been dispatched safely to the reporter.', 'success');
-      tipModal.classList.add('hidden');
-      document.getElementById('tip-message').value = '';
+      const msg = document.getElementById('tip-message').value.trim();
+      if (!msg || !currentItem) return;
+
+      try {
+        const recipientId = currentItem?.reporter?._id || currentItem?.reporter;
+        if (window.API?.chat && recipientId) {
+          const convRes = await window.API.chat.getOrCreateConversation({
+            itemId: currentItem.id,
+            itemModel: currentItem.type === 'lost' ? 'LostItem' : 'FoundItem',
+            recipientId,
+          });
+          if (convRes?.data?._id) {
+            await window.API.chat.sendMessage(convRes.data._id, msg);
+          }
+        }
+        showNotice('Your message has been sent to the reporter!', 'success');
+        tipModal.classList.add('hidden');
+        document.getElementById('tip-message').value = '';
+      } catch (err) {
+        showNotice(err.message || 'Could not send message.', 'error');
+      }
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      const user = getSessionUser();
+      if (user) {
+        const nameInput = document.getElementById('claimant-name');
+        const phoneInput = document.getElementById('claimant-phone');
+        if (nameInput && user.name) nameInput.value = user.name;
+        if (phoneInput && user.phone) phoneInput.value = user.phone;
+      }
+
       loadItemDetails();
 
       const btnChat = document.getElementById('btn-start-chat');
@@ -562,7 +683,7 @@
         btnChat.addEventListener('click', () => {
           const reporterId = currentItem?.reporter?._id || currentItem?.reporter;
           if (window.LFChat) {
-            window.LFChat.openItemChat(itemId, itemType, reporterId);
+            window.LFChat.openItemChat(currentItem?.id || itemId, currentItem?.type || itemType, reporterId);
           }
         });
       }

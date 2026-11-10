@@ -589,6 +589,7 @@
       lostForm.onsubmit = async (e) => {
         e.preventDefault();
         const btn = lostForm.querySelector('button[type="submit"]');
+        const originalBtnHtml = btn ? btn.innerHTML : 'Publish Lost Item Report';
         const fileInput = document.getElementById('image-file-input');
         const formData = new FormData();
 
@@ -603,12 +604,21 @@
         }
         formData.append('date', document.getElementById('item-date').value);
         if (document.getElementById('item-time')) formData.append('time', document.getElementById('item-time').value);
-        if (document.getElementById('item-reward')) formData.append('reward', document.getElementById('item-reward').value.trim());
+        if (document.getElementById('item-reward')) {
+          const rewardVal = document.getElementById('item-reward').value.trim();
+          formData.append('reward', rewardVal ? '$' + rewardVal.replace(/^\$/, '') : '');
+        }
         formData.append('description', document.getElementById('item-desc').value.trim());
         if (document.getElementById('item-tags') && document.getElementById('item-tags').value) {
           formData.append('tags', document.getElementById('item-tags').value.trim());
         }
-        if (document.getElementById('item-security-q')) formData.append('securityQuestion', document.getElementById('item-security-q').value.trim());
+        if (document.getElementById('item-security-q')) {
+          formData.append('securityQuestion', document.getElementById('item-security-q').value.trim());
+        }
+        const contactPref = lostForm.querySelector('input[name="contact-pref"]:checked');
+        if (contactPref) {
+          formData.append('contactPreference', contactPref.value);
+        }
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
           formData.append('image', fileInput.files[0]);
@@ -616,30 +626,21 @@
 
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving to Database...';
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Publishing Report...';
         }
 
         try {
           const res = await window.API.items.createLost(formData);
-          notify('Lost item report saved in MongoDB database!', 'success');
+          notify('Lost item report published successfully!', 'success');
           setTimeout(() => {
             window.location.href = `item-details.html?id=${res.data._id}&type=lost`;
-          }, 800);
+          }, 700);
         } catch (err) {
-          console.error(err);
-          notify('Saved locally: ' + err.message, 'info');
-          if (window.LFApp && window.LFApp.saveItem) {
-            const local = window.LFApp.saveItem({
-              title: document.getElementById('item-title').value.trim(),
-              type: 'lost',
-              category: document.getElementById('item-category').value,
-              location: document.getElementById('item-location').value.trim(),
-              date: document.getElementById('item-date').value,
-              description: document.getElementById('item-desc').value.trim(),
-            });
-            setTimeout(() => {
-              window.location.href = `item-details.html?id=${local.id}`;
-            }, 800);
+          console.error('Lost report error:', err);
+          notify(err.message || 'Failed to publish lost item report. Please check your inputs and login status.', 'error');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
           }
         }
       };
@@ -650,6 +651,7 @@
       foundForm.onsubmit = async (e) => {
         e.preventDefault();
         const btn = foundForm.querySelector('button[type="submit"]');
+        const originalBtnHtml = btn ? btn.innerHTML : 'Publish Found Item Report';
         const fileInput = document.getElementById('image-file-input');
         const formData = new FormData();
 
@@ -667,7 +669,19 @@
         if (document.getElementById('item-tags') && document.getElementById('item-tags').value) {
           formData.append('tags', document.getElementById('item-tags').value.trim());
         }
-        if (document.getElementById('item-security-q')) formData.append('securityQuestion', document.getElementById('item-security-q').value.trim());
+        if (document.getElementById('item-security-q')) {
+          formData.append('securityQuestion', document.getElementById('item-security-q').value.trim());
+        }
+        const custodyEl = foundForm.querySelector('input[name="custody"]:checked');
+        if (custodyEl) {
+          formData.append('custody', custodyEl.value);
+          const custodyLabels = {
+            security: 'Campus Security Desk, Room 104',
+            with_me: 'Held by finder until owner verification',
+            department: 'Department Reception Front Office',
+          };
+          formData.append('custodyLocationDetails', custodyLabels[custodyEl.value] || 'Campus Security Desk, Room 104');
+        }
 
         if (fileInput && fileInput.files && fileInput.files[0]) {
           formData.append('image', fileInput.files[0]);
@@ -675,30 +689,21 @@
 
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running Matching Engine...';
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Publishing & Scanning Matches...';
         }
 
         try {
           const res = await window.API.items.createFound(formData);
-          notify('Found report submitted! Matching scan complete.', 'success');
+          notify('Found item report published successfully! Matching scan complete.', 'success');
           setTimeout(() => {
             window.location.href = `item-details.html?id=${res.data._id}&type=found`;
-          }, 800);
+          }, 700);
         } catch (err) {
-          console.error(err);
-          notify('Saved locally: ' + err.message, 'info');
-          if (window.LFApp && window.LFApp.saveItem) {
-            const local = window.LFApp.saveItem({
-              title: document.getElementById('item-title').value.trim(),
-              type: 'found',
-              category: document.getElementById('item-category').value,
-              location: document.getElementById('item-location').value.trim(),
-              date: document.getElementById('item-date').value,
-              description: document.getElementById('item-desc').value.trim(),
-            });
-            setTimeout(() => {
-              window.location.href = `item-details.html?id=${local.id}`;
-            }, 800);
+          console.error('Found report error:', err);
+          notify(err.message || 'Failed to publish found item report. Please check your inputs and login status.', 'error');
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
           }
         }
       };

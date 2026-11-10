@@ -61,21 +61,21 @@
         <div class="hidden md:flex items-center gap-3">
           <a href="notifications.html" class="relative p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-slate-100 transition-colors" title="Notifications">
             <i class="far fa-bell text-lg"></i>
-            <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
+            <span class="notification-badge hidden absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">0</span>
           </a>
 
           <!-- User Profile Dropdown -->
           <div class="relative">
             <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
-              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
-              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Member">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Member</span>
               <i class="fas fa-chevron-down text-xs text-slate-400"></i>
             </button>
             <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
               <div class="px-4 py-2 border-b border-slate-100">
                 <p class="text-xs text-slate-400 font-medium">Signed in as</p>
-                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
-                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Member</p>
+                <p class="user-display-email text-xs text-indigo-600 truncate"></p>
               </div>
               <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
                 <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
@@ -136,22 +136,27 @@
     </div>
 
     <!-- Tabs Container -->
-    <div class="border-b border-slate-200 mb-8">
-      <div class="flex space-x-8" id="reports-tabs">
-        
-        <button data-tab="lost" class="tab-btn active pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+    <div class="border-b border-slate-200 mb-8 overflow-x-auto">
+      <div class="flex space-x-6 sm:space-x-8 min-w-max" id="reports-tabs">
+
+        <button data-tab="all" class="tab-btn active pb-4 text-sm font-bold border-b-2 border-indigo-600 text-indigo-600 flex items-center gap-2">
+          <span>All Submissions</span>
+          <span id="all-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-700">0</span>
+        </button>
+
+        <button data-tab="lost" class="tab-btn pb-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
           <span>Items I Lost</span>
-          <span id="lost-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-indigo-100 text-indigo-700">2</span>
+          <span id="lost-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-rose-100 text-rose-700">0</span>
         </button>
 
         <button data-tab="found" class="tab-btn pb-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
           <span>Items I Found</span>
-          <span id="found-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-600">1</span>
+          <span id="found-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700">0</span>
         </button>
 
         <button data-tab="claims" class="tab-btn pb-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
           <span>Claims & Inquiries</span>
-          <span id="claims-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">1</span>
+          <span id="claims-count-badge" class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">0</span>
         </button>
 
       </div>
@@ -159,8 +164,18 @@
 
     <!-- Tab Panels -->
 
+    <!-- PANEL 0: ALL SUBMISSIONS (LOST & FOUND) -->
+    <div id="panel-all" class="tab-panel space-y-4">
+      <div id="all-items-list" class="space-y-4">
+        <div class="p-8 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400">
+          <i class="fas fa-spinner fa-spin text-indigo-500 text-lg mb-2"></i>
+          <p>Loading your lost & found reports...</p>
+        </div>
+      </div>
+    </div>
+
     <!-- PANEL 1: ITEMS I LOST -->
-    <div id="panel-lost" class="tab-panel space-y-4">
+    <div id="panel-lost" class="tab-panel hidden space-y-4">
       <div id="lost-items-list" class="space-y-4">
         <!-- Dynamically Rendered -->
       </div>
@@ -176,36 +191,11 @@
     <!-- PANEL 3: CLAIMS & INQUIRIES -->
     <div id="panel-claims" class="tab-panel hidden space-y-4">
       <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8">
-        <h3 class="text-base font-bold text-slate-900 mb-2">Claim Requests for Items You Found</h3>
-        <p class="text-xs text-slate-500 mb-6">Review answers submitted by claimants to verify legitimate ownership before returning the item.</p>
+        <h3 class="text-base font-bold text-slate-900 mb-2">Claim Requests on Your Reported Items</h3>
+        <p class="text-xs text-slate-500 mb-6">Review proof submitted by users to verify legitimate ownership before returning the item.</p>
 
         <div class="space-y-4" id="claims-list-container">
-          
-          <!-- Sample Claim Item -->
-          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">PENDING VERIFICATION</span>
-                <span class="text-xs text-slate-400">Claim for <strong>#LF-1006 (Keys with Subaru Fob)</strong></span>
-              </div>
-              <h4 class="font-bold text-slate-800 text-sm">Claimant: Marcus Cole</h4>
-              <p class="text-xs text-slate-600 mt-1"><strong>Submitted Proof / Answer:</strong> "The bottle opener keychain has an engraved mountain logo and says 'REI Co-op'. The key has a slight scratch near the top ring."</p>
-              <div class="mt-2 text-xs text-slate-500 flex items-center gap-4">
-                <span><i class="fas fa-phone-alt mr-1 text-slate-400"></i> +1 (555) 789-0123</span>
-                <span><i class="far fa-clock mr-1 text-slate-400"></i> Today, 12:30 PM</span>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-2 self-end md:self-center">
-              <button onclick="acceptClaim('LF-1006')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
-                <i class="fas fa-check mr-1"></i> Approve & Reunited
-              </button>
-              <button onclick="LFApp.showToast('Claim inquiry declined.', 'warning'); this.closest('.p-5').remove();" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-colors">
-                Decline
-              </button>
-            </div>
-          </div>
-
+          <div class="p-6 text-center text-xs text-slate-400">Loading claim inquiries...</div>
         </div>
       </div>
     </div>
@@ -223,8 +213,33 @@
     </div>
   </footer>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
   <script>
+    function escapeHtml(val) {
+      return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showNotice(msg, type = 'success') {
+      if (window.LFApp && typeof window.LFApp.showToast === 'function') {
+        window.LFApp.showToast(msg, type);
+      } else {
+        const box = document.createElement('div');
+        const bg = type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : type === 'info' ? '#3b82f6' : '#10b981';
+        box.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:999999;background:${bg};color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:13px;box-shadow:0 10px 25px rgba(0,0,0,0.2);`;
+        box.textContent = msg;
+        document.body.appendChild(box);
+        setTimeout(() => box.remove(), 3500);
+      }
+    }
+
     // Tab Switching Logic
     const tabBtns = document.querySelectorAll('.tab-btn');
     const panels = document.querySelectorAll('.tab-panel');
@@ -232,79 +247,69 @@
     tabBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         tabBtns.forEach(b => {
-          b.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
-          b.classList.add('border-transparent', 'text-slate-500');
+          b.classList.remove('active', 'border-indigo-600', 'text-indigo-600', 'font-bold');
+          b.classList.add('border-transparent', 'text-slate-500', 'font-semibold');
         });
-        btn.classList.add('active', 'border-indigo-600', 'text-indigo-600');
-        btn.classList.remove('border-transparent', 'text-slate-500');
+        btn.classList.add('active', 'border-indigo-600', 'text-indigo-600', 'font-bold');
+        btn.classList.remove('border-transparent', 'text-slate-500', 'font-semibold');
 
         const target = btn.dataset.tab;
         panels.forEach(p => p.classList.add('hidden'));
-        document.getElementById(`panel-${target}`).classList.remove('hidden');
+        document.getElementById(`panel-${target}`)?.classList.remove('hidden');
       });
     });
 
-    // Render User's Reports
-    function renderMyReports() {
-      if (typeof LFApp === 'undefined') return;
-      const allItems = LFApp.getItems();
-      
-      // Filter items marked as user report
-      const lostItems = allItems.filter(i => i.type === 'lost' && (i.isUserReport || i.reporterName === 'Alex'));
-      const foundItems = allItems.filter(i => i.type === 'found' && (i.isUserReport || i.reporterName === 'Alex'));
-
-      document.getElementById('lost-count-badge').textContent = lostItems.length;
-      document.getElementById('found-count-badge').textContent = foundItems.length;
-
-      const lostList = document.getElementById('lost-items-list');
-      const foundList = document.getElementById('found-items-list');
-
-      // Render Lost List
-      if (lostItems.length === 0) {
-        lostList.innerHTML = `<div class="p-8 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400">You haven't reported any lost items.</div>`;
-      } else {
-        lostList.innerHTML = lostItems.map(item => createReportItemCard(item)).join('');
-      }
-
-      // Render Found List
-      if (foundItems.length === 0) {
-        foundList.innerHTML = `<div class="p-8 text-center bg-white rounded-3xl border border-slate-200 text-xs text-slate-400">You haven't reported any found items.</div>`;
-      } else {
-        foundList.innerHTML = foundItems.map(item => createReportItemCard(item)).join('');
-      }
-    }
-
     function createReportItemCard(item) {
+      const id = item._id || item.id;
+      const isLost = item.itemType === 'lost';
       const isReturned = item.status === 'returned';
+      const dateStr = item.date ? String(item.date).split('T')[0] : (item.createdAt ? String(item.createdAt).split('T')[0] : 'Recent');
+      const fallbackImg = isLost
+        ? 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=600&q=80'
+        : 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80';
+
+      const reportKindBadge = isLost
+        ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700 uppercase tracking-wide"><i class="fas fa-exclamation-circle mr-1"></i>Lost Item Report</span>'
+        : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700 uppercase tracking-wide"><i class="fas fa-hand-holding-heart mr-1"></i>Found Item Report</span>';
+
+      const statusBadge = isReturned
+        ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-white">REUNITED / RESOLVED</span>'
+        : '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>';
+
+      const extraMeta = isLost
+        ? (item.reward ? `<span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[10px] font-bold border border-amber-200">Reward: ${escapeHtml(item.reward)}</span>` : '')
+        : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] font-semibold">${escapeHtml(item.custodyLocationDetails || 'Campus Security Desk')}</span>`;
+
       return `
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all">
-          <div class="flex items-center gap-4">
-            <img src="${item.image}" alt="${item.title}" class="w-20 h-20 rounded-2xl object-cover border border-slate-200 flex-shrink-0" onerror="this.src='https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=600&q=80'">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold ${item.type === 'lost' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                  ${item.type.toUpperCase()}
-                </span>
-                <span class="text-xs font-bold text-slate-400">#${item.id}</span>
-                ${isReturned ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-white">REUNITED / RESOLVED</span>' : '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700">Active</span>'}
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all hover:shadow-md">
+          <div class="flex items-start sm:items-center gap-4 min-w-0">
+            <img src="${escapeHtml(item.image || fallbackImg)}" alt="${escapeHtml(item.title)}" class="w-20 h-20 rounded-2xl object-cover border border-slate-200 flex-shrink-0" onerror="this.src='${fallbackImg}'">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                ${reportKindBadge}
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-indigo-700">${escapeHtml(item.category || 'Other')}</span>
+                <span class="text-xs font-bold text-slate-400">#${escapeHtml(id)}</span>
+                ${statusBadge}
+                ${extraMeta}
               </div>
-              <h3 class="text-base font-bold text-slate-900">${item.title}</h3>
-              <p class="text-xs text-slate-500 mt-1">
-                <i class="fas fa-map-marker-alt text-slate-400 mr-1"></i> ${item.location} • Reported ${item.date}
+              <h3 class="text-base font-bold text-slate-900 truncate">${escapeHtml(item.title)}</h3>
+              <p class="text-xs text-slate-600 mt-1 line-clamp-2">${escapeHtml(item.description || '')}</p>
+              <p class="text-xs text-slate-500 mt-1.5">
+                <i class="fas fa-map-marker-alt ${isLost ? 'text-rose-500' : 'text-emerald-500'} mr-1"></i> ${escapeHtml(item.location)} &bull; Reported ${escapeHtml(dateStr)}
               </p>
             </div>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2 self-end md:self-center">
-            <a href="item-details.html?id=${item.id}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
-              View
+          <div class="flex flex-wrap items-center gap-2 self-end md:self-center flex-shrink-0">
+            <a href="item-details.html?id=${encodeURIComponent(id)}&type=${item.itemType}" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors">
+              View Details
             </a>
             ${!isReturned ? `
-              <button onclick="markAsResolved('${item.id}')" class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-colors flex items-center gap-1.5">
+              <button onclick="markAsResolved('${escapeHtml(id)}', '${item.itemType}')" class="px-4 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-colors flex items-center gap-1.5">
                 <i class="fas fa-check"></i> Mark Reunited
               </button>
             ` : ''}
-            <button onclick="deleteReport('${item.id}')" class="px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors" title="Delete Report">
+            <button onclick="deleteReport('${escapeHtml(id)}', '${item.itemType}')" class="px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors" title="Delete Report">
               <i class="fas fa-trash-alt"></i>
             </button>
           </div>
@@ -312,35 +317,181 @@
       `;
     }
 
-    function markAsResolved(id) {
-      if (confirm('Mark this item as successfully reunited / resolved?')) {
-        LFApp.updateItem(id, { status: 'returned' });
-        LFApp.showToast('Item marked as safely reunited! Congratulations!', 'success');
-        renderMyReports();
-      }
-    }
-
-    function deleteReport(id) {
-      if (confirm('Are you sure you want to remove this report?')) {
-        LFApp.deleteItem(id);
-        LFApp.showToast('Report deleted successfully.', 'info');
-        renderMyReports();
-      }
-    }
-
-    function acceptClaim(itemId) {
-      LFApp.updateItem(itemId, { status: 'returned' });
-      LFApp.showToast('Claim approved! Item marked as returned.', 'success');
-      document.getElementById('claims-list-container').innerHTML = `
-        <div class="p-6 text-center text-xs text-emerald-600 bg-emerald-50 rounded-2xl border border-emerald-200">
-          <i class="fas fa-check-circle text-lg mb-2"></i>
-          <p class="font-bold">Claim successfully accepted and recorded.</p>
+    function createEmptyState(label) {
+      return `
+        <div class="p-10 text-center bg-white rounded-3xl border border-dashed border-slate-200">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-3 text-lg">
+            <i class="fas fa-folder-open"></i>
+          </div>
+          <p class="text-sm font-bold text-slate-800">No ${label} yet</p>
+          <p class="text-xs text-slate-500 mt-1 mb-4">When you report a lost or found item, it will appear right here.</p>
+          <div class="flex items-center justify-center gap-2">
+            <a href="report-lost.html" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors">Report Lost</a>
+            <a href="report-found.html" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors">Report Found</a>
+          </div>
         </div>
       `;
-      renderMyReports();
     }
 
-    document.addEventListener('DOMContentLoaded', renderMyReports);
+    async function loadMyReports() {
+      if (!window.API || !window.API.getToken()) return;
+
+      try {
+        const [lostRes, foundRes] = await Promise.allSettled([
+          window.API.request('/lost-items/my-reports'),
+          window.API.request('/found-items/my-reports'),
+        ]);
+
+        const lostItems = ((lostRes.status === 'fulfilled' && lostRes.value && lostRes.value.data) || []).map((i) => ({
+          ...i,
+          itemType: 'lost',
+        }));
+        const foundItems = ((foundRes.status === 'fulfilled' && foundRes.value && foundRes.value.data) || []).map((i) => ({
+          ...i,
+          itemType: 'found',
+        }));
+
+        const allItems = [...lostItems, ...foundItems].sort(
+          (a, b) => new Date(b.createdAt || b.date || 0) - new Date(a.createdAt || a.date || 0)
+        );
+
+        document.getElementById('all-count-badge').textContent = allItems.length;
+        document.getElementById('lost-count-badge').textContent = lostItems.length;
+        document.getElementById('found-count-badge').textContent = foundItems.length;
+
+        const allList = document.getElementById('all-items-list');
+        const lostList = document.getElementById('lost-items-list');
+        const foundList = document.getElementById('found-items-list');
+
+        allList.innerHTML = allItems.length === 0 ? createEmptyState('submissions') : allItems.map(createReportItemCard).join('');
+        lostList.innerHTML = lostItems.length === 0 ? createEmptyState('lost item reports') : lostItems.map(createReportItemCard).join('');
+        foundList.innerHTML = foundItems.length === 0 ? createEmptyState('found item reports') : foundItems.map(createReportItemCard).join('');
+
+        await loadClaimsForMyItems(allItems);
+      } catch (err) {
+        console.error('Failed to load user reports:', err);
+        showNotice(err.message || 'Unable to load your reports.', 'error');
+      }
+    }
+
+    async function loadClaimsForMyItems(items) {
+      const container = document.getElementById('claims-list-container');
+      const badge = document.getElementById('claims-count-badge');
+
+      if (!items || items.length === 0) {
+        badge.textContent = '0';
+        container.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">No claim inquiries on your reports yet.</div>';
+        return;
+      }
+
+      const claimResponses = await Promise.allSettled(
+        items.map((item) => {
+          const itemModel = item.itemType === 'lost' ? 'LostItem' : 'FoundItem';
+          return window.API.claims
+            .getForItem(item._id || item.id, itemModel)
+            .then((res) => ({ item, claims: res.data || [] }));
+        })
+      );
+
+      const allClaims = [];
+      claimResponses.forEach((r) => {
+        if (r.status === 'fulfilled' && r.value.claims.length > 0) {
+          r.value.claims.forEach((c) => allClaims.push({ ...c, targetItem: r.value.item }));
+        }
+      });
+
+      badge.textContent = allClaims.filter((c) => c.status === 'pending').length;
+
+      if (allClaims.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-xs text-slate-400">No claim requests received on your reported items yet.</div>';
+        return;
+      }
+
+      container.innerHTML = allClaims
+        .map((claim) => {
+          const item = claim.targetItem || {};
+          const itemId = item._id || item.id || claim.item;
+          const status = claim.status || 'pending';
+          const statusBadge =
+            status === 'approved'
+              ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">APPROVED</span>'
+              : status === 'rejected'
+              ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">DECLINED</span>'
+              : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">PENDING VERIFICATION</span>';
+
+          return `
+            <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                  ${statusBadge}
+                  <span class="text-xs text-slate-500">Claim on <strong>${item.itemType === 'lost' ? 'LOST' : 'FOUND'}: ${escapeHtml(item.title || 'Item')} (#${escapeHtml(itemId)})</strong></span>
+                </div>
+                <h4 class="font-bold text-slate-800 text-sm">Claimant: ${escapeHtml(claim.claimantName)}</h4>
+                <p class="text-xs text-slate-600 mt-1"><strong>Submitted Proof:</strong> "${escapeHtml(claim.proofDetails)}"</p>
+                <div class="mt-2 text-xs text-slate-500 flex flex-wrap items-center gap-4">
+                  <span><i class="far fa-envelope mr-1 text-slate-400"></i> ${escapeHtml(claim.claimantEmail || '')}</span>
+                  ${claim.claimantPhone ? `<span><i class="fas fa-phone-alt mr-1 text-slate-400"></i> ${escapeHtml(claim.claimantPhone)}</span>` : ''}
+                  <span><i class="far fa-clock mr-1 text-slate-400"></i> ${escapeHtml(claim.createdAt ? String(claim.createdAt).split('T')[0] : 'Recent')}</span>
+                </div>
+              </div>
+
+              ${status === 'pending' ? `
+                <div class="flex items-center gap-2 self-end md:self-center flex-shrink-0">
+                  <button onclick="handleClaimDecision('${escapeHtml(claim._id)}', 'approved')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-sm transition-colors">
+                    <i class="fas fa-check mr-1"></i> Approve & Reunited
+                  </button>
+                  <button onclick="handleClaimDecision('${escapeHtml(claim._id)}', 'rejected')" class="px-3 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-xl transition-colors">
+                    Decline
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    async function markAsResolved(id, itemType) {
+      if (!confirm('Mark this item as successfully reunited / resolved?')) return;
+      try {
+        if (itemType === 'found') {
+          await window.API.items.updateFound(id, { status: 'returned' });
+        } else {
+          await window.API.items.updateLost(id, { status: 'returned' });
+        }
+        showNotice('Item marked as safely reunited! Congratulations!', 'success');
+        await loadMyReports();
+      } catch (err) {
+        showNotice(err.message || 'Failed to update report status.', 'error');
+      }
+    }
+
+    async function deleteReport(id, itemType) {
+      if (!confirm('Are you sure you want to permanently remove this report?')) return;
+      try {
+        if (itemType === 'found') {
+          await window.API.items.deleteFound(id);
+        } else {
+          await window.API.items.deleteLost(id);
+        }
+        showNotice('Report deleted successfully.', 'info');
+        await loadMyReports();
+      } catch (err) {
+        showNotice(err.message || 'Failed to delete report.', 'error');
+      }
+    }
+
+    async function handleClaimDecision(claimId, decision) {
+      try {
+        await window.API.claims.updateStatus(claimId, decision);
+        showNotice(`Claim ${decision === 'approved' ? 'approved! Item marked as returned.' : 'declined.'}`, decision === 'approved' ? 'success' : 'warning');
+        await loadMyReports();
+      } catch (err) {
+        showNotice(err.message || 'Failed to update claim decision.', 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadMyReports);
   </script>
 </body>
 </html>

@@ -330,14 +330,17 @@ const SupabaseDB = {
     return mapClaim(data);
   },
 
-  async getClaimsForItem(itemId) {
+  async getClaimsForItem(itemId, itemModel = null) {
     const numId = toNumericId(itemId);
     if (!numId) return [];
-    const { data, error } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('claims')
       .select('*')
-      .eq('item_id', numId)
-      .order('created_at', { ascending: false });
+      .eq('item_id', numId);
+    if (itemModel) {
+      query = query.eq('item_model', itemModel);
+    }
+    const { data, error } = await query.order('created_at', { ascending: false });
     if (error) throw new Error(error.message);
     return (data || []).map(mapClaim);
   },

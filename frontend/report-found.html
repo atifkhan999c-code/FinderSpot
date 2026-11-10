@@ -638,41 +638,7 @@
         window.LFApp.showToast('All AI detected properties applied to form!', 'success');
       }
     });
-
-    // Form Submission
-    document.getElementById('found-report-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      const title = document.getElementById('item-title').value.trim();
-      const category = document.getElementById('item-category').value;
-      const date = document.getElementById('item-date').value;
-      const location = document.getElementById('item-location').value.trim();
-      const desc = document.getElementById('item-desc').value.trim();
-      const securityQ = document.getElementById('item-security-q').value.trim();
-
-      const newItem = {
-        title: title,
-        type: 'found',
-        category: category,
-        date: date,
-        location: location,
-        description: desc,
-        securityQuestion: securityQ,
-        image: uploadedImageData || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-        status: 'active'
-      };
-
-      if (typeof LFApp !== 'undefined') {
-        const created = LFApp.saveItem(newItem);
-        LFApp.showToast('Found item reported! Thank you for your kindness.', 'success');
-        setTimeout(() => {
-          window.location.href = `item-details.html?id=${created.id}`;
-        }, 900);
-      } else {
-        alert('Found report submitted successfully!');
-        window.location.href = 'browse-items.html';
-      }
-    });
+    // Form submission is handled cleanly via js/app.js setupReportingForms()
   </script>
   <!-- Leaflet Map JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

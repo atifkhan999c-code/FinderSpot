@@ -193,8 +193,10 @@ const submitClaim = async (req, res) => {
  */
 const getClaimsForItem = async (req, res) => {
   try {
+    const itemModel = req.query.itemModel || null;
+
     if (isSupabaseDbReady()) {
-      const claims = await SupabaseDB.getClaimsForItem(req.params.itemId);
+      const claims = await SupabaseDB.getClaimsForItem(req.params.itemId, itemModel);
       return res.status(200).json({
         success: true,
         count: claims.length,
@@ -202,7 +204,9 @@ const getClaimsForItem = async (req, res) => {
       });
     }
 
-    const claims = await Claim.find({ item: req.params.itemId }).sort({ createdAt: -1 });
+    const filter = { item: req.params.itemId };
+    if (itemModel) filter.itemModel = itemModel;
+    const claims = await Claim.find(filter).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
