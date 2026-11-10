@@ -82,8 +82,18 @@
             <span class="notification-badge absolute top-1.5 right-1.5 w-4 h-4 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">2</span>
           </a>
 
-          <!-- User Profile Dropdown -->
-          <div class="relative">
+          <!-- Guest Auth Buttons (Visible when signed out) -->
+          <div id="header-guest-auth-btns" class="flex items-center gap-2 pl-2 border-l border-slate-200">
+            <a href="login.html" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 transition-colors">
+              Sign In
+            </a>
+            <a href="register.html" class="px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 transition-all">
+              Create Account
+            </a>
+          </div>
+
+          <!-- User Profile Dropdown (Shown when authenticated) -->
+          <div class="relative hidden">
             <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
               <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
               <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>

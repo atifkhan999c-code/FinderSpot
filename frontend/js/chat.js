@@ -98,10 +98,9 @@
     }
   }
 
-  // Authenticate session seamlessly (auto-hydrate default demo session if absent)
+  // Authenticate session cleanly without silent background auto-login
   async function ensureAuthenticatedSession() {
     if (!window.API) {
-      console.warn('[Chat] API client not loaded yet.');
       return null;
     }
 
@@ -112,29 +111,13 @@
       try {
         const u = JSON.parse(userStr);
         currentUserId = u._id || u.id;
-        currentUserName = u.name || 'Alex';
+        currentUserName = u.name || 'User';
         currentUserRole = u.role || 'Student';
         updateUserIdentityUI();
         return u;
       } catch (e) {}
     }
 
-    // Auto-login as Alex (Student) by default so chat works instantly
-    try {
-      const res = await window.API.auth.login('alex.morgan@campus.edu', 'password123');
-      if (res && res.data) {
-        currentUserId = res.data._id;
-        currentUserName = res.data.name;
-        currentUserRole = res.data.role || 'Student';
-        updateUserIdentityUI();
-        if (window.socket) {
-          window.socket.emit('join_user_room', currentUserId);
-        }
-        return res.data;
-      }
-    } catch (err) {
-      console.warn('[Chat] Auto-session hydration error:', err.message);
-    }
     return null;
   }
 
@@ -403,7 +386,12 @@
         if (!text) return;
 
         // Ensure session exists
-        await ensureAuthenticatedSession();
+        const user = await ensureAuthenticatedSession();
+        if (!user) {
+          alert('Please sign in to send messages.');
+          window.location.href = 'login.html';
+          return;
+        }
 
         // If no active thread selected, connect or create one
         if (!activeConversationId) {
@@ -501,7 +489,22 @@
       </div>
     `;
 
-    await ensureAuthenticatedSession();
+    const user = await ensureAuthenticatedSession();
+    if (!user) {
+      list.innerHTML = `
+        <div class="p-8 text-center">
+          <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-lg">
+            <i class="fas fa-lock"></i>
+          </div>
+          <p class="font-bold text-slate-800 text-sm">Sign in to message</p>
+          <p class="text-xs text-slate-500 mt-1 mb-4">Authenticate to start live peer-to-peer chats with finders and Campus Security.</p>
+          <a href="login.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors">
+            <i class="fas fa-sign-in-alt"></i> Go to Sign In Page
+          </a>
+        </div>
+      `;
+      return;
+    }
 
     try {
       const res = await window.API.chat.getConversations();
@@ -590,7 +593,8 @@
     }
 
     try {
-      await ensureAuthenticatedSession();
+      const user = await ensureAuthenticatedSession();
+      if (!user) return;
 
       // If context provided, set recipient details
       if (convContext && convContext.recipient) {
@@ -721,7 +725,25 @@
   // Open Chat directly from Item Details Page
   async function openItemChat(itemId, itemModel = 'lost', recipientId = null) {
     openDrawer();
-    await ensureAuthenticatedSession();
+    const list = document.getElementById('chat-threads-list');
+    const user = await ensureAuthenticatedSession();
+    if (!user) {
+      if (list) {
+        list.innerHTML = `
+          <div class="p-8 text-center">
+            <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-lg">
+              <i class="fas fa-lock"></i>
+            </div>
+            <p class="font-bold text-slate-800 text-sm">Sign in to message</p>
+            <p class="text-xs text-slate-500 mt-1 mb-4">Authenticate to start live peer-to-peer chats with finders and Campus Security.</p>
+            <a href="login.html" class="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-colors">
+              <i class="fas fa-sign-in-alt"></i> Go to Sign In Page
+            </a>
+          </div>
+        `;
+      }
+      return;
+    }
 
     try {
       const res = await window.API.chat.getOrCreateConversation({

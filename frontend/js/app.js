@@ -58,6 +58,7 @@
           });
           if (res.data && res.data.token) {
             window.API.setToken(res.data.token);
+            localStorage.setItem('lf_user_session', JSON.stringify(res.data));
           }
           return res;
         },
@@ -69,6 +70,7 @@
           });
           if (res.data && res.data.token) {
             window.API.setToken(res.data.token);
+            localStorage.setItem('lf_user_session', JSON.stringify(res.data));
           }
           return res;
         },
@@ -472,15 +474,19 @@
         e.preventDefault();
         const email = document.getElementById('login-email').value.trim();
         const pwd = document.getElementById('login-password').value;
+        const errBox = document.getElementById('login-error-alert');
         const btn = loginForm.querySelector('button[type="submit"]');
+        const originalBtnHtml = btn ? btn.innerHTML : 'Sign In to FinderSpot';
+
+        if (errBox) errBox.classList.add('hidden');
         if (btn) {
           btn.disabled = true;
-          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Signing In...';
+          btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Authenticating...';
         }
 
         try {
           const res = await window.API.auth.login(email, pwd);
-          notify(`Welcome back, ${res.data.name}!`, 'success');
+          notify(`Welcome back, ${res.data.name}! Redirecting...`, 'success');
           localStorage.setItem('lf_user_session', JSON.stringify(res.data));
 
           // Join Socket room immediately on login
@@ -488,14 +494,21 @@
             socketInstance.emit('join_user_room', res.data._id);
           }
 
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectTarget = urlParams.get('redirect') || 'dashboard.html';
           setTimeout(() => {
-            window.location.href = 'dashboard.html';
+            window.location.href = redirectTarget;
           }, 600);
         } catch (err) {
-          notify(err.message || 'Login failed', 'error');
+          const msg = err.message || 'Invalid email address or password';
+          notify(msg, 'error');
+          if (errBox) {
+            errBox.textContent = msg;
+            errBox.classList.remove('hidden');
+          }
           if (btn) {
             btn.disabled = false;
-            btn.innerHTML = 'Sign In to Account';
+            btn.innerHTML = originalBtnHtml;
           }
         }
       };
@@ -509,17 +522,30 @@
         const email = document.getElementById('reg-email').value.trim();
         const phone = document.getElementById('reg-phone') ? document.getElementById('reg-phone').value.trim() : '';
         const role = document.getElementById('reg-role') ? document.getElementById('reg-role').value : 'Student';
+        const studentId = document.getElementById('reg-id') ? document.getElementById('reg-id').value.trim() : '';
         const password = document.getElementById('reg-password').value;
         const confirmPwd = document.getElementById('reg-confirm-password').value;
-        const terms = document.getElementById('terms-agree');
+        const errBox = document.getElementById('register-error-alert');
         const btn = regForm.querySelector('button[type="submit"]');
+        const originalBtnHtml = btn ? btn.innerHTML : 'Create Account & Continue';
 
-        if (terms && !terms.checked) {
-          notify('Please agree to the Terms of Service', 'warning');
+        if (errBox) errBox.classList.add('hidden');
+        if (password.length < 6) {
+          const msg = 'Password must be at least 6 characters long.';
+          notify(msg, 'warning');
+          if (errBox) {
+            errBox.textContent = msg;
+            errBox.classList.remove('hidden');
+          }
           return;
         }
         if (password !== confirmPwd) {
-          notify('Passwords do not match', 'error');
+          const msg = 'Passwords do not match. Please verify both fields.';
+          notify(msg, 'error');
+          if (errBox) {
+            errBox.textContent = msg;
+            errBox.classList.remove('hidden');
+          }
           return;
         }
 
@@ -529,7 +555,7 @@
         }
 
         try {
-          const res = await window.API.auth.register({ name, email, phone, role, password });
+          const res = await window.API.auth.register({ name, email, phone, role, studentId, password });
           notify(`Account created! Welcome, ${res.data.name}`, 'success');
           localStorage.setItem('lf_user_session', JSON.stringify(res.data));
 
@@ -541,10 +567,15 @@
             window.location.href = 'dashboard.html';
           }, 700);
         } catch (err) {
-          notify(err.message || 'Registration failed', 'error');
+          const msg = err.message || 'Registration failed. Please check your details.';
+          notify(msg, 'error');
+          if (errBox) {
+            errBox.textContent = msg;
+            errBox.classList.remove('hidden');
+          }
           if (btn) {
             btn.disabled = false;
-            btn.innerHTML = 'Create Account';
+            btn.innerHTML = originalBtnHtml;
           }
         }
       };
@@ -746,8 +777,134 @@
     }
   }
 
-  // 9. Initialize on DOM ready
+  // 9. Setup Header Navigation Auth State (Sign In / User Dropdown & Logout)
+  function setupHeaderAuthUI() {
+    const token = window.API ? window.API.getToken() : localStorage.getItem('lf_jwt_token');
+    let currentUser = null;
+    try {
+      const str = localStorage.getItem('lf_user_session');
+      if (token && str) currentUser = JSON.parse(str);
+    } catch (e) {}
+
+    // Protect authenticated user pages
+    const protectedPages = ['dashboard', 'profile', 'my-reports', 'my-claims', 'notifications', 'admin'];
+    const pathLower = window.location.pathname.toLowerCase();
+    const isProtected = protectedPages.some((p) => pathLower.endsWith(`/${p}`) || pathLower.endsWith(`/${p}.html`));
+    if (!currentUser && isProtected) {
+      const targetPage = window.location.pathname.split('/').pop() || 'dashboard.html';
+      window.location.href = `login.html?redirect=${encodeURIComponent(targetPage)}`;
+      return;
+    }
+
+    const userMenuBtn = document.getElementById('user-menu-btn');
+    const userDropdown = document.getElementById('user-dropdown');
+    const userMenuWrapper = userMenuBtn ? userMenuBtn.closest('.relative') : null;
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    // Bind mobile hamburger menu toggle across pages
+    if (mobileMenuBtn && mobileMenu && !mobileMenuBtn.dataset.bound) {
+      mobileMenuBtn.dataset.bound = 'true';
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+
+    if (currentUser) {
+      // Logged-in state: populate user name, avatar, email and keep profile menu visible
+      if (userMenuWrapper) userMenuWrapper.classList.remove('hidden');
+      const existingGuestBtns = document.getElementById('header-guest-auth-btns');
+      if (existingGuestBtns) existingGuestBtns.classList.add('hidden');
+
+      document.querySelectorAll('.user-display-name').forEach((el) => {
+        el.textContent = currentUser.name || 'Member';
+      });
+      document.querySelectorAll('.user-display-avatar').forEach((el) => {
+        if (el.tagName === 'IMG' && currentUser.avatar) {
+          el.src = currentUser.avatar;
+          el.alt = currentUser.name || 'User';
+        }
+      });
+      if (userDropdown) {
+        const emailEl = userDropdown.querySelector('p.text-indigo-600');
+        if (emailEl && currentUser.email) emailEl.textContent = currentUser.email;
+      }
+
+      if (userMenuBtn && userDropdown && !userMenuBtn.dataset.bound) {
+        userMenuBtn.dataset.bound = 'true';
+        userMenuBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          userDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', () => userDropdown.classList.add('hidden'));
+      }
+
+      // Bind Sign Out / Logout clicks
+      document.querySelectorAll('a, button').forEach((el) => {
+        const txt = (el.textContent || '').trim().toLowerCase();
+        if (txt === 'sign out' || txt === 'logout' || el.classList.contains('logout-btn')) {
+          if (!el.dataset.logoutBound) {
+            el.dataset.logoutBound = 'true';
+            el.addEventListener('click', (e) => {
+              e.preventDefault();
+              if (socketInstance && typeof socketInstance.disconnect === 'function') {
+                socketInstance.disconnect();
+              }
+              if (window.API && window.API.auth) {
+                window.API.auth.logout();
+              } else {
+                localStorage.removeItem('lf_jwt_token');
+                localStorage.removeItem('lf_user_session');
+                window.location.href = 'login.html';
+              }
+            });
+          }
+        }
+      });
+    } else {
+      // Guest / Logged-out state: Hide fake Alex profile menu and display crisp Sign In / Sign Up buttons
+      if (userMenuWrapper) userMenuWrapper.classList.add('hidden');
+      document.querySelectorAll('.notification-badge').forEach((b) => b.classList.add('hidden'));
+
+      const navContainer = userMenuWrapper ? userMenuWrapper.parentElement : null;
+      if (navContainer && !document.getElementById('header-guest-auth-btns')) {
+        const authBtns = document.createElement('div');
+        authBtns.id = 'header-guest-auth-btns';
+        authBtns.className = 'flex items-center gap-2 pl-2 border-l border-slate-200';
+        authBtns.innerHTML = `
+          <a href="login.html" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 transition-colors">
+            Sign In
+          </a>
+          <a href="register.html" class="px-4 py-2 rounded-xl text-sm font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm shadow-indigo-200 transition-all">
+            Create Account
+          </a>
+        `;
+        navContainer.appendChild(authBtns);
+      }
+
+      // Ensure mobile menu shows Login / Register instead of Sign Out
+      if (mobileMenu) {
+        mobileMenu.querySelectorAll('a').forEach((a) => {
+          if (a.textContent.trim().toLowerCase() === 'sign out') {
+            a.textContent = 'Sign In';
+            a.className = 'text-sm font-bold text-indigo-600';
+            const parentDiv = a.parentElement;
+            if (parentDiv && !parentDiv.querySelector('a[href*="register.html"]')) {
+              const regLink = document.createElement('a');
+              regLink.href = 'register.html';
+              regLink.className = 'px-4 py-1.5 rounded-lg text-sm font-semibold bg-indigo-600 text-white';
+              regLink.textContent = 'Create Account';
+              parentDiv.appendChild(regLink);
+            }
+          }
+        });
+      }
+    }
+  }
+
+  // 10. Initialize on DOM ready
   document.addEventListener('DOMContentLoaded', () => {
+    setupHeaderAuthUI();
     ensureSocketClientScript();
     setupAuthForms();
     setupReportingForms();

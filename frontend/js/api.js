@@ -56,6 +56,7 @@ const API = {
       });
       if (res.data && res.data.token) {
         API.setToken(res.data.token);
+        localStorage.setItem('lf_user_session', JSON.stringify(res.data));
       }
       return res;
     },
@@ -80,15 +81,7 @@ const API = {
           return JSON.parse(userStr);
         } catch (e) {}
       }
-
-      // Default auto-login as Alex (Student) for frictionless testing
-      try {
-        const res = await this.login('alex.morgan@campus.edu', 'password123');
-        return res.data;
-      } catch (err) {
-        console.warn('[API] Auto-session login failed:', err.message);
-        return null;
-      }
+      return null;
     },
 
     async switchDemoUser(targetRole = 'Security') {

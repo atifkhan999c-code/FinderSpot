@@ -52,6 +52,33 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'frontend', 'index.html'));
 });
 
+// Clean SEO & Direct Authentication/Page Routes (support URLs without .html)
+const cleanPages = [
+  'login',
+  'register',
+  'dashboard',
+  'map',
+  'browse-items',
+  'report-lost',
+  'report-found',
+  'item-details',
+  'my-reports',
+  'my-claims',
+  'notifications',
+  'profile',
+  'admin',
+  'contact',
+  'about',
+];
+cleanPages.forEach((page) => {
+  app.get(`/${page}`, (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', `${page}.html`));
+  });
+});
+app.get('/browse', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'browse-items.html'));
+});
+
 // 4. Global API Rate Limiter
 app.use('/api', apiLimiter);
 

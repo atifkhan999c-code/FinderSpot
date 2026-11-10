@@ -77,6 +77,9 @@
       <!-- Login Form -->
       <form id="login-form" class="space-y-4">
         
+        <!-- Inline Error Feedback Box -->
+        <div id="login-error-alert" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2"></div>
+
         <!-- Email -->
         <div>
           <label for="login-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
@@ -123,13 +126,13 @@
         <span class="relative bg-white px-3 text-xs text-slate-400 uppercase tracking-wider">Or continue with</span>
       </div>
 
-      <!-- SSO buttons -->
+      <!-- Quick Demo / Campus SSO buttons -->
       <div class="grid grid-cols-2 gap-3">
-        <button type="button" onclick="window.location.href='dashboard.html'" class="py-2.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors">
-          <i class="fab fa-google text-red-500"></i> Google
+        <button type="button" id="sso-student-btn" class="py-2.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer">
+          <i class="fab fa-google text-red-500"></i> Google Campus
         </button>
-        <button type="button" onclick="window.location.href='dashboard.html'" class="py-2.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors">
-          <i class="fas fa-university text-indigo-600"></i> Campus SSO
+        <button type="button" id="sso-campus-btn" class="py-2.5 px-3 border border-slate-200 hover:bg-slate-50 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-2 transition-colors cursor-pointer">
+          <i class="fas fa-university text-indigo-600"></i> University SSO
         </button>
       </div>
 
@@ -148,6 +151,7 @@
   </footer>
 
   <script src="/socket.io/socket.io.js"></script>
+  <script src="js/main.js"></script>
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   <script>
@@ -169,8 +173,17 @@
       }
     });
 
+    // Quick Campus SSO demo actions (uses actual login API)
+    async function triggerSsoDemoLogin() {
+      document.getElementById('login-email').value = 'alex.morgan@campus.edu';
+      document.getElementById('login-password').value = 'password123';
+      document.getElementById('login-form').requestSubmit();
+    }
+    document.getElementById('sso-student-btn')?.addEventListener('click', triggerSsoDemoLogin);
+    document.getElementById('sso-campus-btn')?.addEventListener('click', triggerSsoDemoLogin);
+
     // Password visibility toggle
-    document.getElementById('toggle-password').addEventListener('click', function() {
+    document.getElementById('toggle-password')?.addEventListener('click', function() {
       const input = document.getElementById('login-password');
       const icon = this.querySelector('i');
       if (input.type === 'password') {
@@ -179,43 +192,6 @@
       } else {
         input.type = 'password';
         icon.classList.replace('fa-eye-slash', 'fa-eye');
-      }
-    });
-
-    // Form submission with live backend API authentication
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('login-email').value.trim();
-      const password = document.getElementById('login-password').value;
-      const submitBtn = e.target.querySelector('button[type="submit"]');
-      const originalText = submitBtn.innerHTML;
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Authenticating...';
-
-      try {
-        if (window.API && window.API.auth) {
-          const res = await window.API.auth.login(email, password);
-          if (typeof LFApp !== 'undefined') {
-            LFApp.showToast(`Welcome back, ${res.data.name}! Redirecting...`, 'success');
-          }
-        }
-        setTimeout(() => {
-          const referrer = document.referrer;
-          if (referrer && !referrer.includes('login.html') && !referrer.includes('register.html')) {
-            window.location.href = referrer;
-          } else {
-            window.location.href = 'dashboard.html';
-          }
-        }, 700);
-      } catch (err) {
-        if (typeof LFApp !== 'undefined') {
-          LFApp.showToast(err.message || 'Invalid email or password', 'error');
-        } else {
-          alert('Login failed: ' + err.message);
-        }
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
       }
     });
   </script>
