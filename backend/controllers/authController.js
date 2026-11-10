@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const { MOCK_USERS } = require('../data/mockData');
 
+if (!global.fallbackUsers) {
+  global.fallbackUsers = MOCK_USERS.map((u) => ({ ...u, password: 'password123' }));
+}
+
 /**
  * Generate JSON Web Token
  */
@@ -25,21 +29,14 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone, role, studentId, department } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || typeof email !== 'string' || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
         message: 'Please provide name, email, and password',
       });
     }
 
-    // Check if user already exists
-    const userExists = await User.findOne({ email: email.toLowerCase() });
-    if (userExists) {
-      return res.status(400).json({
-        success: false,
-        message: 'A user with this email address is already registered',
-      });
-    }
+    const emailClean = email.trim().toLowerCase();
 
     // Restrict public registration roles to prevent unauthorized privilege escalation
     const allowedPublicRoles = ['Student', 'Faculty', 'Staff', 'General Public'];
@@ -48,10 +45,48 @@ const registerUser = async (req, res) => {
       assignedRole = role;
     }
 
+    if (mongoose.connection.readyState !== 1) {
+      if (password.length < 6) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+      }
+      const exists = global.fallbackUsers.find((u) => u.email === emailClean);
+      if (exists) {
+        return res.status(400).json({ success: false, message: 'A user with this email address is already registered' });
+      }
+      const newUser = {
+        _id: 'USR-' + Date.now(),
+        name: name.trim(),
+        email: emailClean,
+        password,
+        phone: phone || '',
+        role: assignedRole,
+        studentId: studentId || '',
+        department: department || '',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        trustPoints: 100,
+      };
+      global.fallbackUsers.push(newUser);
+      const { password: _, ...safeUser } = newUser;
+      return res.status(201).json({
+        success: true,
+        message: 'Account created successfully',
+        data: { ...safeUser, token: generateToken(newUser._id) },
+      });
+    }
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email: emailClean });
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        message: 'A user with this email address is already registered',
+      });
+    }
+
     // Create user
     const user = await User.create({
-      name,
-      email: email.toLowerCase(),
+      name: name.trim(),
+      email: emailClean,
       password,
       phone: phone || '',
       role: assignedRole,
@@ -74,6 +109,10 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      const msg = Object.values(error.errors).map((e) => e.message).join(', ');
+      return res.status(400).json({ success: false, message: msg });
+    }
     console.error('Registration Error:', error);
     res.status(500).json({
       success: false,
@@ -91,28 +130,38 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (mongoose.connection.readyState !== 1) {
-      const isOfficer = (email || '').toLowerCase().includes('security');
-      const u = isOfficer ? MOCK_USERS[1] : MOCK_USERS[0];
-      return res.status(200).json({
-        success: true,
-        message: 'Login successful (Demo Mode)',
-        data: {
-          ...u,
-          token: generateToken(u._id),
-        },
-      });
-    }
-
-    if (!email || !password) {
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       return res.status(400).json({
         success: false,
         message: 'Please provide both email and password',
       });
     }
 
+    const emailClean = email.trim().toLowerCase();
+
+    if (mongoose.connection.readyState !== 1) {
+      const matched = global.fallbackUsers.find(
+        (u) => u.email.toLowerCase() === emailClean && u.password === password
+      );
+      if (!matched) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email address or password',
+        });
+      }
+      const { password: _, ...safeUser } = matched;
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          ...safeUser,
+          token: generateToken(matched._id),
+        },
+      });
+    }
+
     // Check for user (include password field)
-    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    const user = await User.findOne({ email: emailClean }).select('+password');
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({
@@ -151,6 +200,9 @@ const loginUser = async (req, res) => {
  */
 const getUserProfile = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(200).json({ success: true, data: req.user });
+    }
     const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({

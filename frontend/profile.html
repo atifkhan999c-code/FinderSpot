@@ -132,22 +132,21 @@
 
         <div class="text-center sm:text-left flex-grow">
           <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-            <h1 id="profile-name-header" class="text-2xl font-extrabold text-slate-900 tracking-tight">Alex</h1>
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-              <i class="fas fa-check-circle text-xs"></i> Verified Student
+            <h1 id="profile-name-header" class="text-2xl font-extrabold text-slate-900 tracking-tight">Member</h1>
+            <span id="profile-role-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
+              <i class="fas fa-check-circle text-xs"></i> Verified Member
             </span>
           </div>
-          <p id="profile-role-header" class="text-xs font-semibold text-slate-500 mt-1">Computer Science & Engineering • ID #STU-98421</p>
+          <p id="profile-role-header" class="text-xs font-semibold text-slate-500 mt-1">Loading profile...</p>
           <div class="mt-3 flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-slate-500">
-            <span><i class="far fa-envelope text-slate-400 mr-1.5"></i> alex.morgan@campus.edu</span>
-            <span><i class="fas fa-phone-alt text-slate-400 mr-1.5"></i> +1 (555) 234-5678</span>
-            <span><i class="far fa-calendar-check text-slate-400 mr-1.5"></i> Member since Sept 2025</span>
+            <span><i class="far fa-envelope text-slate-400 mr-1.5"></i> <span id="profile-email-badge">--</span></span>
+            <span><i class="fas fa-phone-alt text-slate-400 mr-1.5"></i> <span id="profile-phone-badge">--</span></span>
           </div>
         </div>
 
         <!-- Community Karma Badge -->
         <div class="sm:border-l sm:border-slate-100 sm:pl-6 text-center">
-          <p class="text-2xl font-extrabold text-indigo-600">320</p>
+          <p id="profile-trust-points" class="text-2xl font-extrabold text-indigo-600">100</p>
           <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Trust Points</p>
         </div>
 
@@ -168,22 +167,22 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <label for="prof-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Full Name</label>
-              <input type="text" id="prof-name" value="Alex" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <input type="text" id="prof-name" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
             </div>
 
             <div>
               <label for="prof-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Campus Email Address</label>
-              <input type="email" id="prof-email" value="alex.morgan@campus.edu" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <input type="email" id="prof-email" readonly class="w-full px-4 py-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-500 text-sm cursor-not-allowed">
             </div>
 
             <div>
               <label for="prof-phone" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Phone Number</label>
-              <input type="tel" id="prof-phone" value="+1 (555) 234-5678" required class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <input type="tel" id="prof-phone" placeholder="+1 (555) 000-0000" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
             </div>
 
             <div>
               <label for="prof-dept" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Department / Major</label>
-              <input type="text" id="prof-dept" value="Computer Science & Engineering" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+              <input type="text" id="prof-dept" placeholder="Department" class="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
             </div>
           </div>
         </div>
@@ -264,38 +263,67 @@
     </div>
   </footer>
 
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/app.js"></script>
   <script>
-    function loadUserProfile() {
-      if (typeof LFApp === 'undefined') return;
-      const user = LFApp.getCurrentUser();
+    async function loadUserProfile() {
+      let user = null;
+      try {
+        if (window.API && window.API.getToken()) {
+          const res = await window.API.auth.getProfile();
+          if (res && res.data) {
+            user = res.data;
+            localStorage.setItem('lf_user_session', JSON.stringify(user));
+          }
+        }
+      } catch (e) {}
+
+      if (!user) {
+        try {
+          user = JSON.parse(localStorage.getItem('lf_user_session'));
+        } catch (e) {}
+      }
       if (!user) return;
 
-      document.getElementById('prof-name').value = user.name || 'Alex';
-      document.getElementById('prof-email').value = user.email || 'alex.morgan@campus.edu';
-      document.getElementById('prof-phone').value = user.phone || '+1 (555) 234-5678';
-      document.getElementById('prof-dept').value = user.department || 'Computer Science & Engineering';
+      document.getElementById('prof-name').value = user.name || '';
+      document.getElementById('prof-email').value = user.email || '';
+      document.getElementById('prof-phone').value = user.phone || '';
+      document.getElementById('prof-dept').value = user.department || '';
 
-      document.getElementById('profile-name-header').textContent = user.name || 'Alex';
-      document.getElementById('profile-role-header').textContent = `${user.department || 'Student'} • ID #${user.studentId || 'STU-98421'}`;
+      document.getElementById('profile-name-header').textContent = user.name || 'Member';
+      document.getElementById('profile-role-badge').innerHTML = `<i class="fas fa-check-circle text-xs"></i> Verified ${user.role || 'Member'}`;
+      document.getElementById('profile-role-header').textContent = `${user.department || user.role || 'Member'}${user.studentId ? ' • ID #' + user.studentId : ''}`;
+      document.getElementById('profile-email-badge').textContent = user.email || '--';
+      document.getElementById('profile-phone-badge').textContent = user.phone || 'Not provided';
+      document.getElementById('profile-trust-points').textContent = user.trustPoints !== undefined ? user.trustPoints : 100;
     }
 
-    document.getElementById('profile-update-form').addEventListener('submit', function(e) {
+    document.getElementById('profile-update-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const updatedName = document.getElementById('prof-name').value.trim();
-      const updatedEmail = document.getElementById('prof-email').value.trim();
       const updatedPhone = document.getElementById('prof-phone').value.trim();
       const updatedDept = document.getElementById('prof-dept').value.trim();
 
-      if (typeof LFApp !== 'undefined') {
-        LFApp.saveCurrentUser({
-          name: updatedName,
-          email: updatedEmail,
-          phone: updatedPhone,
-          department: updatedDept
-        });
-        LFApp.showToast('Profile information successfully updated!', 'success');
+      try {
+        if (window.API && window.API.getToken()) {
+          const res = await window.API.auth.updateProfile({
+            name: updatedName,
+            phone: updatedPhone,
+            department: updatedDept
+          });
+          if (res && res.data) {
+            localStorage.setItem('lf_user_session', JSON.stringify(res.data));
+          }
+        }
+        if (typeof LFApp !== 'undefined') {
+          LFApp.showToast('Profile information successfully updated!', 'success');
+          LFApp.updateUserUI();
+        }
         loadUserProfile();
+      } catch (err) {
+        if (typeof LFApp !== 'undefined') LFApp.showToast(err.message || 'Update failed', 'error');
       }
     });
 

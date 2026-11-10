@@ -705,11 +705,15 @@
     }
   }
 
-  // 8. Synchronize Live MongoDB Items with Frontend UI
+  // 8. Synchronize Live MongoDB Items with Frontend UI (Only when signed in)
   async function syncLiveItems() {
-    const isBrowse = window.location.pathname.includes('browse-items.html');
-    const isDashboard = window.location.pathname.includes('dashboard.html');
-    const isHome = window.location.pathname.endsWith('index.html') || window.location.pathname === '/';
+    const token = window.API ? window.API.getToken() : localStorage.getItem('lf_jwt_token');
+    if (!token) return; // Never fetch or render reports before login
+
+    const path = window.location.pathname.toLowerCase();
+    const isBrowse = path.includes('browse-items');
+    const isDashboard = path.includes('dashboard');
+    const isHome = path.endsWith('index.html') || path === '/';
 
     if (!isBrowse && !isDashboard && !isHome) return;
 
@@ -719,61 +723,228 @@
         window.API.items.getAllFound({ limit: 40 }),
       ]);
 
+      const lostItems = (lostRes.status === 'fulfilled' && lostRes.value && lostRes.value.data) || [];
+      const foundItems = (foundRes.status === 'fulfilled' && foundRes.value && foundRes.value.data) || [];
       const items = [];
 
-      if (lostRes.status === 'fulfilled' && lostRes.value && lostRes.value.data) {
-        lostRes.value.data.forEach((item) => {
-          items.push({
-            id: item._id,
-            title: item.title,
-            type: 'lost',
-            category: item.category,
-            location: item.location,
-            date: item.date ? item.date.split('T')[0] : 'Recent',
-            time: item.time || '',
-            reward: item.reward || '',
-            status: item.status || 'active',
-            description: item.description,
-            image:
-              item.image ||
-              'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80',
-            reporterName: item.reporterName || 'Student',
-            isUserReport: false,
-          });
+      lostItems.forEach((item) => {
+        items.push({
+          id: item._id,
+          title: item.title,
+          type: 'lost',
+          category: item.category,
+          location: item.location,
+          date: item.date ? String(item.date).split('T')[0] : 'Recent',
+          time: item.time || '',
+          reward: item.reward || '',
+          status: item.status || 'active',
+          description: item.description,
+          image: item.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80',
+          reporterName: item.reporterName || 'Member',
+          isUserReport: false,
         });
+      });
+
+      foundItems.forEach((item) => {
+        items.push({
+          id: item._id,
+          title: item.title,
+          type: 'found',
+          category: item.category,
+          location: item.location,
+          date: item.date ? String(item.date).split('T')[0] : 'Recent',
+          time: item.time || '',
+          reward: '',
+          status: item.status || 'active',
+          description: item.description,
+          image: item.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+          reporterName: item.reporterName || 'Community Member',
+          isUserReport: false,
+        });
+      });
+
+      localStorage.setItem('lf_items_data', JSON.stringify(items));
+
+      if (typeof window.renderItems === 'function') {
+        window.renderItems();
       }
 
-      if (foundRes.status === 'fulfilled' && foundRes.value && foundRes.value.data) {
-        foundRes.value.data.forEach((item) => {
-          items.push({
-            id: item._id,
-            title: item.title,
-            type: 'found',
-            category: item.category,
-            location: item.location,
-            date: item.date ? item.date.split('T')[0] : 'Recent',
-            time: item.time || '',
-            reward: '',
-            status: item.status || 'active',
-            description: item.description,
-            image:
-              item.image ||
-              'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-            reporterName: item.reporterName || 'Community Member',
-            isUserReport: false,
-          });
-        });
-      }
+      // Render Homepage Grids if on index.html
+      if (isHome) {
+        const lostGrid = document.getElementById('home-lost-grid');
+        const foundGrid = document.getElementById('home-found-grid');
 
-      if (items.length > 0) {
-        localStorage.setItem('lf_items_data', JSON.stringify(items));
-        console.log(`📡 Synced ${items.length} items from MongoDB.`);
-        if (typeof window.renderItems === 'function') {
-          window.renderItems();
+        if (lostGrid) {
+          const topLost = items.filter((i) => i.type === 'lost').slice(0, 4);
+          lostGrid.innerHTML =
+            topLost.length === 0
+              ? '<div class="col-span-full text-center py-8 text-slate-400 text-sm">No lost item reports yet.</div>'
+              : topLost
+                  .map(
+                    (i) => `
+                <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+                  <div class="relative h-48 overflow-hidden bg-slate-100">
+                    <img src="${i.image}" alt="${i.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">LOST</span>
+                    ${i.reward ? `<span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">Reward: ${i.reward}</span>` : ''}
+                  </div>
+                  <div class="p-5 flex flex-col flex-grow">
+                    <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">${i.category}</div>
+                    <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">${i.title}</h3>
+                    <p class="text-xs text-slate-500 mt-2 line-clamp-2">${i.description || ''}</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+                      <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">${i.location}</span></div>
+                      <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>${i.date}</span></div>
+                    </div>
+                    <a href="item-details.html?id=${i.id}&type=lost" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">View Details</a>
+                  </div>
+                </div>`
+                  )
+                  .join('');
+        }
+
+        if (foundGrid) {
+          const topFound = items.filter((i) => i.type === 'found').slice(0, 4);
+          foundGrid.innerHTML =
+            topFound.length === 0
+              ? '<div class="col-span-full text-center py-8 text-slate-400 text-sm">No found item reports yet.</div>'
+              : topFound
+                  .map(
+                    (i) => `
+                <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
+                  <div class="relative h-48 overflow-hidden bg-slate-100">
+                    <img src="${i.image}" alt="${i.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                    <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">FOUND</span>
+                  </div>
+                  <div class="p-5 flex flex-col flex-grow">
+                    <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">${i.category}</div>
+                    <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">${i.title}</h3>
+                    <p class="text-xs text-slate-500 mt-2 line-clamp-2">${i.description || ''}</p>
+                    <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
+                      <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">${i.location}</span></div>
+                      <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>${i.date}</span></div>
+                    </div>
+                    <a href="item-details.html?id=${i.id}&type=found" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">Claim This Item</a>
+                  </div>
+                </div>`
+                  )
+                  .join('');
         }
       }
     } catch (e) {
       console.warn('Sync notice:', e.message);
+    }
+  }
+
+  // Hydrate Dashboard dynamically ONLY with current logged-in user's reports & activity
+  async function hydrateUserDashboard() {
+    const path = window.location.pathname.toLowerCase();
+    if (!path.includes('dashboard')) return;
+    if (!window.API || !window.API.getToken()) return;
+
+    try {
+      const [myLostRes, myFoundRes, notifRes] = await Promise.allSettled([
+        window.API.request('/lost-items/my-reports'),
+        window.API.request('/found-items/my-reports'),
+        window.API.notifications.getAll(),
+      ]);
+
+      const myLost = (myLostRes.status === 'fulfilled' && myLostRes.value && myLostRes.value.data) || [];
+      const myFound = (myFoundRes.status === 'fulfilled' && myFoundRes.value && myFoundRes.value.data) || [];
+      const notifs = (notifRes.status === 'fulfilled' && notifRes.value && notifRes.value.data) || [];
+
+      const activeLost = myLost.filter((i) => i.status === 'active').length;
+      const activeFound = myFound.filter((i) => i.status === 'active').length;
+      const resolvedCount = [...myLost, ...myFound].filter((i) => i.status === 'returned' || i.status === 'claimed').length;
+
+      const lostEl = document.getElementById('dash-lost-count');
+      const foundEl = document.getElementById('dash-found-count');
+      const totalEl = document.getElementById('dash-total-count');
+      const resolvedEl = document.getElementById('dash-resolved-count');
+      const subEl = document.getElementById('dash-greeting-sub');
+
+      if (lostEl) lostEl.textContent = activeLost;
+      if (foundEl) foundEl.textContent = activeFound;
+      if (totalEl) totalEl.textContent = myLost.length + myFound.length;
+      if (resolvedEl) resolvedEl.textContent = resolvedCount;
+      if (subEl) {
+        subEl.textContent = `You currently have ${activeLost} active lost item report(s) and ${activeFound} found item report(s).`;
+      }
+
+      const listEl = document.getElementById('dash-reports-list');
+      if (listEl) {
+        const combined = [
+          ...myLost.map((i) => ({ ...i, type: 'lost' })),
+          ...myFound.map((i) => ({ ...i, type: 'found' })),
+        ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        if (combined.length === 0) {
+          listEl.innerHTML = `
+            <div class="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+              <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mx-auto mb-3 text-lg">
+                <i class="fas fa-folder-open"></i>
+              </div>
+              <p class="text-sm font-bold text-slate-700">No reports submitted yet</p>
+              <p class="text-xs text-slate-500 mt-1 mb-4">Report a lost or found item to track it here.</p>
+              <div class="flex items-center justify-center gap-2">
+                <a href="report-lost.html" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 transition-colors">Report Lost</a>
+                <a href="report-found.html" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition-colors">Report Found</a>
+              </div>
+            </div>
+          `;
+        } else {
+          listEl.innerHTML = combined
+            .slice(0, 5)
+            .map((item) => {
+              const isLost = item.type === 'lost';
+              const badgeCls = isLost ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700';
+              const dateStr = item.date ? String(item.date).split('T')[0] : 'Recent';
+              return `
+                <div class="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
+                  <div class="flex items-center gap-3.5">
+                    <img src="${item.image || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=150&q=80'}" alt="${item.title}" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeCls}">${item.type.toUpperCase()}</span>
+                        <span class="text-xs font-semibold text-slate-400 uppercase">${item.status || 'active'}</span>
+                      </div>
+                      <h3 class="text-sm font-bold text-slate-900 mt-1">${item.title}</h3>
+                      <p class="text-xs text-slate-500 mt-0.5"><i class="fas fa-map-marker-alt text-indigo-500 mr-1"></i> ${item.location} • ${dateStr}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 self-end sm:self-center">
+                    <a href="item-details.html?id=${item._id}&type=${item.type}" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold">View</a>
+                  </div>
+                </div>`;
+            })
+            .join('');
+        }
+      }
+
+      const actEl = document.getElementById('dash-activity-list');
+      if (actEl) {
+        if (notifs.length === 0) {
+          actEl.innerHTML = '<p class="text-xs text-slate-400 italic">No recent activity alerts.</p>';
+        } else {
+          actEl.innerHTML = notifs
+            .slice(0, 4)
+            .map(
+              (n) => `
+              <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
+                  <i class="fas fa-bell"></i>
+                </div>
+                <div class="text-xs">
+                  <p class="font-semibold text-slate-800">${n.title}</p>
+                  <p class="text-slate-500 text-[11px]">${n.message}</p>
+                </div>
+              </div>`
+            )
+            .join('');
+        }
+      }
+    } catch (err) {
+      console.warn('Dashboard hydration notice:', err.message);
     }
   }
 
@@ -786,13 +957,27 @@
       if (token && str) currentUser = JSON.parse(str);
     } catch (e) {}
 
-    // Protect authenticated user pages
-    const protectedPages = ['dashboard', 'profile', 'my-reports', 'my-claims', 'notifications', 'admin'];
+    // Gate ALL Lost & Found report creation, browsing, details, maps, and account pages behind login
+    const protectedPages = [
+      'dashboard',
+      'profile',
+      'my-reports',
+      'my-claims',
+      'notifications',
+      'admin',
+      'browse-items',
+      'browse',
+      'report-lost',
+      'report-found',
+      'item-details',
+      'map',
+    ];
     const pathLower = window.location.pathname.toLowerCase();
     const isProtected = protectedPages.some((p) => pathLower.endsWith(`/${p}`) || pathLower.endsWith(`/${p}.html`));
     if (!currentUser && isProtected) {
+      localStorage.removeItem('lf_items_data');
       const targetPage = window.location.pathname.split('/').pop() || 'dashboard.html';
-      window.location.href = `login.html?redirect=${encodeURIComponent(targetPage)}`;
+      window.location.href = `login.html?redirect=${encodeURIComponent(targetPage + window.location.search)}`;
       return;
     }
 
@@ -802,7 +987,11 @@
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
 
-    // Bind mobile hamburger menu toggle across pages
+    // Toggle Homepage Gates
+    const homeAuthGate = document.getElementById('home-auth-gate');
+    const homeReportsWall = document.getElementById('home-reports-wall');
+    const homeSearchWidget = document.getElementById('home-search-widget');
+
     if (mobileMenuBtn && mobileMenu && !mobileMenuBtn.dataset.bound) {
       mobileMenuBtn.dataset.bound = 'true';
       mobileMenuBtn.addEventListener('click', () => {
@@ -811,13 +1000,20 @@
     }
 
     if (currentUser) {
-      // Logged-in state: populate user name, avatar, email and keep profile menu visible
+      // Authenticated state
+      if (homeAuthGate) homeAuthGate.classList.add('hidden');
+      if (homeReportsWall) homeReportsWall.classList.remove('hidden');
+      if (homeSearchWidget) homeSearchWidget.classList.remove('hidden');
+
       if (userMenuWrapper) userMenuWrapper.classList.remove('hidden');
       const existingGuestBtns = document.getElementById('header-guest-auth-btns');
       if (existingGuestBtns) existingGuestBtns.classList.add('hidden');
 
       document.querySelectorAll('.user-display-name').forEach((el) => {
         el.textContent = currentUser.name || 'Member';
+      });
+      document.querySelectorAll('.user-display-email').forEach((el) => {
+        el.textContent = currentUser.email || '';
       });
       document.querySelectorAll('.user-display-avatar').forEach((el) => {
         if (el.tagName === 'IMG' && currentUser.avatar) {
@@ -850,6 +1046,7 @@
               if (socketInstance && typeof socketInstance.disconnect === 'function') {
                 socketInstance.disconnect();
               }
+              localStorage.removeItem('lf_items_data');
               if (window.API && window.API.auth) {
                 window.API.auth.logout();
               } else {
@@ -862,9 +1059,14 @@
         }
       });
     } else {
-      // Guest / Logged-out state: Hide fake Alex profile menu and display crisp Sign In / Sign Up buttons
+      // Guest / Logged-out state: Ensure zero lost/found reports appear anywhere
+      localStorage.removeItem('lf_items_data');
+      if (homeAuthGate) homeAuthGate.classList.remove('hidden');
+      if (homeReportsWall) homeReportsWall.classList.add('hidden');
+      if (homeSearchWidget) homeSearchWidget.classList.add('hidden');
+
       if (userMenuWrapper) userMenuWrapper.classList.add('hidden');
-      document.querySelectorAll('.notification-badge').forEach((b) => b.classList.add('hidden'));
+      document.querySelectorAll('.notification-badge, .chat-nav-badge').forEach((b) => b.classList.add('hidden'));
 
       const navContainer = userMenuWrapper ? userMenuWrapper.parentElement : null;
       if (navContainer && !document.getElementById('header-guest-auth-btns')) {
@@ -882,7 +1084,6 @@
         navContainer.appendChild(authBtns);
       }
 
-      // Ensure mobile menu shows Login / Register instead of Sign Out
       if (mobileMenu) {
         mobileMenu.querySelectorAll('a').forEach((a) => {
           if (a.textContent.trim().toLowerCase() === 'sign out') {
@@ -909,5 +1110,6 @@
     setupAuthForms();
     setupReportingForms();
     syncLiveItems();
+    hydrateUserDashboard();
   });
 })();

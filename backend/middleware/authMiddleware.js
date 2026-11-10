@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const User = require('../models/User');
+const { MOCK_USERS } = require('../data/mockData');
 
 /**
  * Protect route with JWT authentication
@@ -18,7 +20,16 @@ const protect = async (req, res, next) => {
         process.env.JWT_SECRET || 'super_secret_jwt_key_finderspot_2026_campus_auth'
       );
 
-      req.user = await User.findById(decoded.id).select('-password');
+      if (mongoose.connection.readyState !== 1) {
+        const pool = global.fallbackUsers || MOCK_USERS;
+        const found = pool.find((u) => String(u._id) === String(decoded.id));
+        if (found) {
+          const { password: _, ...safe } = found;
+          req.user = safe;
+        }
+      } else {
+        req.user = await User.findById(decoded.id).select('-password');
+      }
 
       if (!req.user) {
         return res.status(401).json({

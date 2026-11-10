@@ -192,8 +192,8 @@
         </a>
       </div>
 
-      <!-- Interactive Search Bar Widget -->
-      <div class="mt-12 max-w-4xl mx-auto bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100">
+      <!-- Interactive Search Bar Widget (Shown once logged in) -->
+      <div id="home-search-widget" class="hidden mt-12 max-w-4xl mx-auto bg-white p-3 sm:p-4 rounded-2xl shadow-xl shadow-slate-200/60 border border-slate-100">
         <form action="browse-items.html" method="GET" class="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3">
           
           <div class="sm:col-span-5 relative">
@@ -266,243 +266,78 @@
     </div>
   </section>
 
-  <!-- Recent Lost Items Section -->
-  <section class="py-16 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-        <div>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 uppercase tracking-wider bg-rose-50 px-2.5 py-1 rounded-md mb-2">
-            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Urgent Assistance Needed
-          </span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Recently Lost Belongings</h2>
-          <p class="mt-1 text-slate-500 text-sm">Have you seen any of these items around campus or local transit?</p>
+  <!-- Protected Reports Notice (Visible Before Login) -->
+  <section id="home-auth-gate" class="py-16 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="bg-white rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50 p-8 sm:p-12 text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+        <div class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl mx-auto mb-5 shadow-sm">
+          <i class="fas fa-lock"></i>
         </div>
-        <a href="browse-items.html?type=lost" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors">
-          View all lost items <i class="fas fa-arrow-right text-xs"></i>
-        </a>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Sign In to View or Report Items</h2>
+        <p class="text-slate-600 text-sm sm:text-base mt-3 max-w-xl mx-auto leading-relaxed">
+          To protect community privacy and prevent unauthorized claims, all lost &amp; found item listings, reporting forms, and campus maps are only visible after signing in.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center justify-center gap-4">
+          <a href="login.html" class="px-7 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-lg shadow-indigo-200 transition-all flex items-center gap-2">
+            <i class="fas fa-sign-in-alt"></i> Sign In Now
+          </a>
+          <a href="register.html" class="px-7 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm transition-all flex items-center gap-2">
+            <i class="fas fa-user-plus"></i> Create Account
+          </a>
+        </div>
       </div>
-
-      <!-- Items Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <!-- Card 1 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=600&q=80" alt="iPhone 13" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
-              LOST
-            </span>
-            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
-              Reward: $50
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Electronics</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">iPhone 13 (Midnight Blue)</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Lost in clear case with cat sticker on back. Tempered glass screen protector.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Library 2nd Floor Quiet Zone</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 30, 2026 (2 days ago)</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1001" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              View Details & Help
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=600&q=80" alt="Leather Wallet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
-              LOST
-            </span>
-            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
-              Reward: $25
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Wallets & Cards</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">Black Leather Bifold Wallet</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Contains student ID for Sarah J., driver license, and metro pass. Keep cash, need cards!</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Student Union Food Court</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 29, 2026</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1002" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              View Details & Help
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=600&q=80" alt="Calculator" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
-              LOST
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Books & Stationery</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">Casio fx-991EX Scientific Calculator</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Left on desk row 3 after physics quiz. Has silver star sticker on sliding back cover.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Science Building Room 402</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 31, 2026 (Today)</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1003" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              View Details & Help
-            </a>
-          </div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80" alt="North Face Backpack" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
-              LOST
-            </span>
-            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
-              Reward: $40
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">Bags & Luggage</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-indigo-600 transition-colors line-clamp-1">North Face Borealis Backpack</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Navy blue backpack with textbooks and lab notebooks inside. Vital for midterm exams.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-rose-500 w-3.5"></i> <span class="truncate">Central Gym Locker Area</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 28, 2026</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1004" class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-700 hover:bg-indigo-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              View Details & Help
-            </a>
-          </div>
-        </div>
-
-      </div>
-
     </div>
   </section>
 
-  <!-- Recent Found Items Section -->
-  <section class="py-16 bg-white border-t border-slate-200">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-        <div>
-          <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-md mb-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Awaiting Rightful Owner
-          </span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Found Belongings</h2>
-          <p class="mt-1 text-slate-500 text-sm">Did you misplace something recently? Check if it was safely handed over.</p>
+  <!-- Authenticated Lost & Found Reports Wall (Hidden Until Signed In) -->
+  <div id="home-reports-wall" class="hidden">
+    <!-- Recent Lost Items Section -->
+    <section class="py-16 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 uppercase tracking-wider bg-rose-50 px-2.5 py-1 rounded-md mb-2">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span> Urgent Assistance Needed
+            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Recently Lost Belongings</h2>
+            <p class="mt-1 text-slate-500 text-sm">Have you seen any of these items around campus or local transit?</p>
+          </div>
+          <a href="browse-items.html?type=lost" class="inline-flex items-center gap-2 text-sm font-semibold text-rose-600 hover:text-rose-700 transition-colors">
+            View all lost items <i class="fas fa-arrow-right text-xs"></i>
+          </a>
         </div>
-        <a href="browse-items.html?type=found" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
-          View all found items <i class="fas fa-arrow-right text-xs"></i>
-        </a>
+
+        <!-- Live Dynamic Lost Items Grid -->
+        <div id="home-lost-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="col-span-full text-center py-8 text-slate-400 text-sm">Loading live lost reports...</div>
+        </div>
       </div>
+    </section>
 
-      <!-- Items Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
-        <!-- Found Card 1 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80" alt="Headphones" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
-              FOUND
+    <!-- Recent Found Items Section -->
+    <section class="py-16 bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 uppercase tracking-wider bg-emerald-50 px-2.5 py-1 rounded-md mb-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Awaiting Rightful Owner
             </span>
-            <span class="absolute bottom-3 right-3 px-2 py-0.5 rounded-md text-xs font-semibold bg-white/90 text-slate-800 backdrop-blur-sm shadow-sm">
-              In Security Custody
-            </span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Found Belongings</h2>
+            <p class="mt-1 text-slate-500 text-sm">Did you misplace something recently? Check if it was safely handed over.</p>
           </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Electronics</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Sony WH-1000XM4 Headphones</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Black over-ear wireless headphones with zippered travel case found on sofa.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">Student Lounge Vending Area</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 31, 2026 (Today)</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1005" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              Claim This Item
-            </a>
-          </div>
+          <a href="browse-items.html?type=found" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
+            View all found items <i class="fas fa-arrow-right text-xs"></i>
+          </a>
         </div>
 
-        <!-- Found Card 2 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=600&q=80" alt="Car Keys" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
-              FOUND
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Keys</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Subaru Key Fob with Carabiner</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Ring of 4 keys with red anodized carabiner and small silver bottle opener.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">West Parking Lot B</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 30, 2026</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1006" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              Claim This Item
-            </a>
-          </div>
+        <!-- Live Dynamic Found Items Grid -->
+        <div id="home-found-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="col-span-full text-center py-8 text-slate-400 text-sm">Loading live found reports...</div>
         </div>
-
-        <!-- Found Card 3 -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=600&q=80" alt="Hydro Flask" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-600 text-white shadow-sm">
-              FOUND
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">Accessories</div>
-            <h3 class="font-bold text-slate-900 text-base group-hover:text-emerald-600 transition-colors line-clamp-1">Hydro Flask 32oz Tumbler</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Cobalt blue bottle covered with outdoor stickers (NASA, Yosemite, GitHub).</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-emerald-500 w-3.5"></i> <span class="truncate">CS Building Lab 105</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Oct 29, 2026</span></div>
-            </div>
-            <a href="item-details.html?id=LF-1007" class="mt-4 w-full py-2 px-3 rounded-xl bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-semibold text-xs text-center transition-colors">
-              Claim This Item
-            </a>
-          </div>
-        </div>
-
-        <!-- Found Card 4 (Returned Success) -->
-        <div class="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-lg transition-all group flex flex-col opacity-90">
-          <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img src="https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=600&q=80" alt="Sunglasses" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-700 text-white shadow-sm flex items-center gap-1">
-              <i class="fas fa-check text-[10px]"></i> RETURNED
-            </span>
-          </div>
-          <div class="p-5 flex flex-col flex-grow">
-            <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Accessories</div>
-            <h3 class="font-bold text-slate-700 text-base line-clamp-1">Ray-Ban Aviator Sunglasses</h3>
-            <p class="text-xs text-slate-500 mt-2 line-clamp-2">Gold frame in original brown leather case. Successfully verified and reunited with owner.</p>
-            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5 text-xs text-slate-500 flex-grow">
-              <div class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-slate-400 w-3.5"></i> <span class="truncate">Engineering Quad Lawn</span></div>
-              <div class="flex items-center gap-2"><i class="far fa-clock text-slate-400 w-3.5"></i> <span>Reunited Oct 28</span></div>
-            </div>
-            <span class="mt-4 w-full py-2 px-3 rounded-xl bg-slate-100 text-slate-500 font-semibold text-xs text-center">
-              Successfully Resolved
-            </span>
-          </div>
-        </div>
-
       </div>
-
-    </div>
-  </section>
+    </section>
+  </div>
 
   <!-- How It Works Section -->
   <section class="py-20 bg-slate-50">

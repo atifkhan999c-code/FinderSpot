@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 // Route imports
@@ -87,6 +88,8 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     service: 'Lost and Found Web API',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'fallback',
+    databaseNotice: global.dbConnectionError || null,
     security: 'Helmet CSP & Rate Limiting Active',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),

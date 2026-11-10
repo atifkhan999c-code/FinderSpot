@@ -139,11 +139,9 @@ const INITIAL_NOTIFICATIONS = [
 ];
 
 function initStorage() {
-  if (!localStorage.getItem(STORAGE_KEYS.ITEMS)) {
-    localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(INITIAL_ITEMS));
-  }
-  if (!localStorage.getItem(STORAGE_KEYS.NOTIFICATIONS)) {
-    localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(INITIAL_NOTIFICATIONS));
+  // Never seed fake items or user sessions automatically before authentication
+  if (!localStorage.getItem('lf_jwt_token')) {
+    localStorage.removeItem(STORAGE_KEYS.ITEMS);
   }
 }
 
@@ -151,11 +149,11 @@ initStorage();
 
 const FinderApp = {
   getItems() {
-    initStorage();
+    if (!localStorage.getItem('lf_jwt_token')) return [];
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEYS.ITEMS)) || [];
     } catch (e) {
-      return INITIAL_ITEMS;
+      return [];
     }
   },
 

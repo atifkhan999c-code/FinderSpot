@@ -415,7 +415,9 @@ async function runMasterQA() {
 
   // Functional Test 8: Get Item Details by ID
   try {
-    const detailRes = await makeRequest(`/api/lost-items/${testLostItemId}`);
+    const detailRes = await makeRequest(`/api/lost-items/${testLostItemId}`, {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = detailRes.status === 200 && detailRes.data.success && detailRes.data.data._id === testLostItemId;
     recordTest('functional', 'View Item Details by ID (GET /api/lost-items/:id)', passed, {
       status: detailRes.status,
@@ -427,7 +429,9 @@ async function runMasterQA() {
 
   // Functional Test 9: Search and Filter Items
   try {
-    const searchRes = await makeRequest('/api/search?q=MacBook&type=all');
+    const searchRes = await makeRequest('/api/search?q=MacBook&type=all', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = searchRes.status === 200 && searchRes.data.success && Array.isArray(searchRes.data.data);
     const itemFound = searchRes.data.data.some((i) => i.title.includes('MacBook'));
     recordTest('functional', 'Search items by query keyword (/api/search?q=...)', passed && itemFound, {
@@ -442,7 +446,9 @@ async function runMasterQA() {
 
   // Functional Test 10: Category and Type Filter
   try {
-    const filterRes = await makeRequest('/api/search?category=Electronics&type=lost');
+    const filterRes = await makeRequest('/api/search?category=Electronics&type=lost', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = filterRes.status === 200 && filterRes.data.success && filterRes.data.data.every((i) => i.type === 'lost' && i.category === 'Electronics');
     recordTest('functional', 'Filter items by Category and Type (/api/search?category=...&type=...)', passed, {
       status: filterRes.status,
@@ -454,7 +460,9 @@ async function runMasterQA() {
 
   // Functional Test 11: Interactive Map Endpoints
   try {
-    const mapRes = await makeRequest('/api/search/map?lat=40.7295&lng=-73.9965&radius=1000&type=all');
+    const mapRes = await makeRequest('/api/search/map?lat=40.7295&lng=-73.9965&radius=1000&type=all', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = mapRes.status === 200 && mapRes.data.success && Array.isArray(mapRes.data.data);
     recordTest('functional', 'Map Geo-spatial query endpoint (/api/search/map)', passed, {
       status: mapRes.status,
@@ -918,10 +926,26 @@ async function runMasterQA() {
     recordTest('edgeCases', 'Special Characters, Emojis & Multilingual Unicode Support', false, { error: err.message });
   }
 
+  // Security Test 11: Unauthenticated Access to Lost/Found Reports Blocked (401)
+  try {
+    const unauthLostRes = await makeRequest('/api/lost-items');
+    const unauthFoundRes = await makeRequest('/api/found-items');
+    const passed = unauthLostRes.status === 401 && unauthFoundRes.status === 401;
+    recordTest('security', 'Auth Gate: Lost & Found Reports Blocked Before Login (401)', passed, {
+      lostStatus: unauthLostRes.status,
+      foundStatus: unauthFoundRes.status,
+      error: passed ? null : 'Lost or found reports leaked before authentication!',
+    });
+  } catch (err) {
+    recordTest('security', 'Auth Gate: Lost & Found Reports Blocked Before Login (401)', false, { error: err.message });
+  }
+
   // Edge Case 7: Non-existent Valid ObjectId (404 expected)
   try {
     const nonExistentId = '507f1f77bcf86cd799439011';
-    const notFoundRes = await makeRequest(`/api/lost-items/${nonExistentId}`);
+    const notFoundRes = await makeRequest(`/api/lost-items/${nonExistentId}`, {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = notFoundRes.status === 404 && !notFoundRes.data.success;
     recordTest('edgeCases', 'Non-existent Item ID (GET /api/lost-items/507f...)', passed, {
       status: notFoundRes.status,
@@ -935,7 +959,9 @@ async function runMasterQA() {
 
   // Edge Case 8: Malformed / Invalid ObjectId ('abc-123')
   try {
-    const malformedIdRes = await makeRequest('/api/lost-items/invalid-id-xyz');
+    const malformedIdRes = await makeRequest('/api/lost-items/invalid-id-xyz', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     // If CastError is unhandled, it may return 500; a well-handled API returns 400 or 404
     const handledGracefully = malformedIdRes.status === 400 || malformedIdRes.status === 404;
     recordTest('edgeCases', 'Malformed ObjectId Handling (CastError handling)', handledGracefully, {
@@ -950,7 +976,9 @@ async function runMasterQA() {
 
   // Edge Case 9: Unescaped Regex Characters in Search Query ('[', '(', '*', '+')
   try {
-    const regexRes = await makeRequest('/api/search?q=[');
+    const regexRes = await makeRequest('/api/search?q=[', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     // If unescaped, MongoDB throws MongoServerError: Regular expression is invalid -> returns 500
     const handledGracefully = regexRes.status === 200 || regexRes.status === 400;
     recordTest('edgeCases', 'Search Query Regex Injection / Unescaped Metacharacters', handledGracefully, {
@@ -1012,7 +1040,9 @@ async function runMasterQA() {
 
   // Performance Test 2: Search API latency (< 250ms target)
   try {
-    const p2 = await makeRequest('/api/search?q=phone&category=all');
+    const p2 = await makeRequest('/api/search?q=phone&category=all', {
+      headers: { Authorization: `Bearer ${studentToken}` },
+    });
     const passed = p2.duration < 250;
     recordTest('performance', 'Search API Latency (< 250ms)', passed, {
       duration: `${p2.duration}ms`,
@@ -1025,7 +1055,11 @@ async function runMasterQA() {
   // Performance Test 3: Concurrent Request Burst (20 simultaneous requests)
   try {
     const burstStart = Date.now();
-    const burstPromises = Array.from({ length: 20 }, (_, i) => makeRequest(`/api/lost-items`));
+    const burstPromises = Array.from({ length: 20 }, (_, i) =>
+      makeRequest('/api/lost-items', {
+        headers: { Authorization: `Bearer ${studentToken}` },
+      })
+    );
     const burstResults = await Promise.all(burstPromises);
     const totalBurstDuration = Date.now() - burstStart;
     const allSuccessful = burstResults.every((r) => r.status === 200);

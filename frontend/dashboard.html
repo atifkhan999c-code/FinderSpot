@@ -74,8 +74,8 @@
           <!-- User Profile Dropdown -->
           <div class="relative">
             <button id="user-menu-btn" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors focus:outline-none">
-              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="Alex">
-              <span class="user-display-name text-sm font-semibold text-slate-700">Alex</span>
+              <img class="user-display-avatar w-8 h-8 rounded-full object-cover ring-2 ring-indigo-500/30" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80" alt="User">
+              <span class="user-display-name text-sm font-semibold text-slate-700">Member</span>
               <i class="fas fa-chevron-down text-xs text-slate-400"></i>
             </button>
 
@@ -83,8 +83,8 @@
             <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
               <div class="px-4 py-2 border-b border-slate-100">
                 <p class="text-xs text-slate-400 font-medium">Signed in as</p>
-                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Alex</p>
-                <p class="text-xs text-indigo-600 truncate">alex.morgan@campus.edu</p>
+                <p class="text-sm font-bold text-slate-800 truncate user-display-name">Member</p>
+                <p class="text-xs text-indigo-600 truncate user-display-email"></p>
               </div>
               <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-600">
                 <i class="fas fa-chart-pie w-4 text-slate-400"></i> Dashboard
@@ -146,10 +146,10 @@
             Overview Dashboard
           </span>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            Welcome back, <span class="user-display-name">Alex</span> 👋
+            Welcome back, <span class="user-display-name">Member</span> 👋
           </h1>
-          <p class="text-indigo-200 text-sm mt-1 max-w-xl">
-            You currently have 2 active lost item reports and 1 found item reported. Check potential community matches below.
+          <p id="dash-greeting-sub" class="text-indigo-200 text-sm mt-1 max-w-xl">
+            Manage your reported lost or found items and track recovery alerts from your dashboard.
           </p>
         </div>
 
@@ -164,29 +164,6 @@
       </div>
     </div>
 
-    <!-- Smart Match Alert Box -->
-    <div class="mb-8 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div class="flex items-start sm:items-center gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 font-bold shadow-sm">
-          <i class="fas fa-bolt"></i>
-        </div>
-        <div>
-          <h4 class="text-sm font-bold text-amber-900">Potential Match Detected!</h4>
-          <p class="text-xs text-amber-800 mt-0.5">
-            A found report for <strong>"Sony WH-1000XM4 Headphones"</strong> in Student Lounge matches items in your category.
-          </p>
-        </div>
-      </div>
-      <div class="flex items-center gap-2 sm:flex-shrink-0">
-        <a href="item-details.html?id=LF-1005" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors">
-          Inspect Match
-        </a>
-        <button onclick="this.closest('.mb-8').remove()" class="p-2 text-amber-700 hover:text-amber-900 text-xs">
-          Dismiss
-        </button>
-      </div>
-    </div>
-
     <!-- 4 KPI Metrics -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
       
@@ -194,8 +171,8 @@
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Lost Items</p>
-          <p class="text-3xl font-extrabold text-rose-600 mt-1">2</p>
-          <span class="text-[11px] text-slate-500 font-medium">1 with reward</span>
+          <p id="dash-lost-count" class="text-3xl font-extrabold text-rose-600 mt-1">0</p>
+          <span class="text-[11px] text-slate-500 font-medium">Your active reports</span>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
           <i class="fas fa-search"></i>
@@ -206,8 +183,8 @@
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Found Items Reported</p>
-          <p class="text-3xl font-extrabold text-emerald-600 mt-1">1</p>
-          <span class="text-[11px] text-emerald-600 font-medium font-semibold">1 claim received</span>
+          <p id="dash-found-count" class="text-3xl font-extrabold text-emerald-600 mt-1">0</p>
+          <span class="text-[11px] text-emerald-600 font-medium font-semibold">Your found submissions</span>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
           <i class="fas fa-hand-holding-heart"></i>
@@ -217,9 +194,9 @@
       <!-- Metric 3 -->
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
-          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Claim Inquiries</p>
-          <p class="text-3xl font-extrabold text-indigo-600 mt-1">3</p>
-          <span class="text-[11px] text-slate-500 font-medium">Awaiting review</span>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Submitted</p>
+          <p id="dash-total-count" class="text-3xl font-extrabold text-indigo-600 mt-1">0</p>
+          <span class="text-[11px] text-slate-500 font-medium">All time activity</span>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
           <i class="fas fa-shield-alt"></i>
@@ -230,8 +207,8 @@
       <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
         <div>
           <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resolved / Reunited</p>
-          <p class="text-3xl font-extrabold text-slate-800 mt-1">1</p>
-          <span class="text-[11px] text-emerald-600 font-medium">100% verified</span>
+          <p id="dash-resolved-count" class="text-3xl font-extrabold text-slate-800 mt-1">0</p>
+          <span class="text-[11px] text-emerald-600 font-medium">Verified returns</span>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-600 flex items-center justify-center text-xl">
           <i class="fas fa-check-circle"></i>
@@ -257,66 +234,12 @@
             </a>
           </div>
 
-          <!-- Reports List -->
-          <div class="space-y-4">
-            
-            <!-- Item 1 -->
-            <div class="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
-              <div class="flex items-center gap-3.5">
-                <img src="https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=150&q=80" alt="iPhone" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">LOST</span>
-                    <span class="text-xs font-semibold text-slate-400">#LF-1001</span>
-                  </div>
-                  <h3 class="text-sm font-bold text-slate-900 mt-1">iPhone 13 (Midnight Blue with Clear Case)</h3>
-                  <p class="text-xs text-slate-500 mt-0.5"><i class="fas fa-map-marker-alt text-rose-500 mr-1"></i> Library 2nd Floor • Oct 30, 2026</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 self-end sm:self-center">
-                <a href="item-details.html?id=LF-1001" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold">View</a>
-                <a href="report-lost.html?edit=LF-1001" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-xs font-semibold">Edit</a>
-              </div>
+          <!-- Reports List (Dynamically Loaded for Active User) -->
+          <div id="dash-reports-list" class="space-y-4">
+            <div class="text-center py-8 text-slate-400 text-xs">
+              <i class="fas fa-spinner fa-spin text-lg text-indigo-500 mb-2"></i>
+              <p>Loading your reports...</p>
             </div>
-
-            <!-- Item 2 -->
-            <div class="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
-              <div class="flex items-center gap-3.5">
-                <img src="https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=150&q=80" alt="Calculator" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">LOST</span>
-                    <span class="text-xs font-semibold text-slate-400">#LF-1003</span>
-                  </div>
-                  <h3 class="text-sm font-bold text-slate-900 mt-1">Casio fx-991EX Scientific Calculator</h3>
-                  <p class="text-xs text-slate-500 mt-0.5"><i class="fas fa-map-marker-alt text-rose-500 mr-1"></i> Science Building 402 • Oct 31, 2026</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 self-end sm:self-center">
-                <a href="item-details.html?id=LF-1003" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold">View</a>
-                <a href="report-lost.html?edit=LF-1003" class="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-xs font-semibold">Edit</a>
-              </div>
-            </div>
-
-            <!-- Item 3 -->
-            <div class="p-4 rounded-2xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
-              <div class="flex items-center gap-3.5">
-                <img src="https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=150&q=80" alt="Keys" class="w-16 h-16 rounded-xl object-cover border border-slate-200">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">FOUND</span>
-                    <span class="text-xs font-semibold text-slate-400">#LF-1006</span>
-                  </div>
-                  <h3 class="text-sm font-bold text-slate-900 mt-1">Set of Keys with Subaru Fob & Carabiner</h3>
-                  <p class="text-xs text-slate-500 mt-0.5"><i class="fas fa-map-marker-alt text-emerald-500 mr-1"></i> West Parking Lot B • Oct 30, 2026</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2 self-end sm:self-center">
-                <a href="item-details.html?id=LF-1006" class="px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold">View</a>
-                <a href="my-reports.html" class="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 text-xs font-semibold">1 Claim</a>
-              </div>
-            </div>
-
           </div>
         </div>
 
@@ -373,41 +296,8 @@
             <a href="notifications.html" class="text-xs font-semibold text-indigo-600 hover:text-indigo-700">All Alerts</a>
           </div>
 
-          <div class="space-y-4">
-            
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                <i class="fas fa-bolt"></i>
-              </div>
-              <div class="text-xs">
-                <p class="font-semibold text-slate-800">Match Alert Detected</p>
-                <p class="text-slate-500 text-[11px]">Sony Headphones reported found in Student Lounge</p>
-                <span class="text-[10px] text-slate-400">2 hours ago</span>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                <i class="fas fa-comment-alt"></i>
-              </div>
-              <div class="text-xs">
-                <p class="font-semibold text-slate-800">Claim Inquiry Received</p>
-                <p class="text-slate-500 text-[11px]">Marcus submitted a claim for found keys (#LF-1006)</p>
-                <span class="text-[10px] text-slate-400">5 hours ago</span>
-              </div>
-            </div>
-
-            <div class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                <i class="fas fa-check"></i>
-              </div>
-              <div class="text-xs">
-                <p class="font-semibold text-slate-800">Item Successfully Returned</p>
-                <p class="text-slate-500 text-[11px]">Ray-Ban Eyeglasses verified and closed</p>
-                <span class="text-[10px] text-slate-400">2 days ago</span>
-              </div>
-            </div>
-
+          <div id="dash-activity-list" class="space-y-4">
+            <p class="text-xs text-slate-400 italic">Loading recent activity...</p>
           </div>
         </div>
 
@@ -420,7 +310,7 @@
   <!-- Site Footer -->
   <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p>&copy; 2026 FinderSpot Platform. Logged in as <span class="user-display-name font-semibold text-slate-700">Alex</span></p>
+      <p>&copy; 2026 FinderSpot Platform. Logged in as <span class="user-display-name font-semibold text-slate-700">Member</span></p>
       <div class="flex items-center gap-4">
         <a href="contact.html" class="hover:text-indigo-600">Help Desk</a>
         <a href="profile.html" class="hover:text-indigo-600">Settings</a>

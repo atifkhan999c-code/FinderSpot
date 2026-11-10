@@ -12,11 +12,11 @@ const { protect, optionalAuth } = require('../middleware/authMiddleware');
 const { submissionLimiter } = require('../middleware/securityMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
-// Get all found items / report newly found item
+// Get all found items / report newly found item (Requires login)
 router
   .route('/')
-  .get(getAllFoundItems)
-  .post(submissionLimiter, optionalAuth, upload.single('image'), createFoundItem);
+  .get(protect, getAllFoundItems)
+  .post(protect, submissionLimiter, upload.single('image'), createFoundItem);
 
 // Logged-in user's own reported found items
 router.get('/my-reports', protect, getMyFoundItems);
@@ -24,7 +24,7 @@ router.get('/my-reports', protect, getMyFoundItems);
 // Individual found item operations
 router
   .route('/:id')
-  .get(getFoundItemById)
+  .get(protect, getFoundItemById)
   .put(protect, upload.single('image'), updateFoundItem)
   .delete(protect, deleteFoundItem);
 

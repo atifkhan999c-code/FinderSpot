@@ -35,24 +35,42 @@ const connectDB = async () => {
 
   const isProduction = process.env.NODE_ENV === 'production';
 
-  // If running in production and no URI found in env, use verified Atlas cluster
+  // Verified Atlas cluster fallback if Render env var is missing or misconfigured
   const DEFAULT_ATLAS_URI =
     'mongodb+srv://atifkhan999c_db_user:Atifkhan1234@cluster0.ztmgtbw.mongodb.net/lost_and_found_db?retryWrites=true&w=majority';
+
   if (!uri && isProduction) {
     console.log('📡 Using verified MongoDB Atlas Cluster URI for cloud production deployment.');
     uri = DEFAULT_ATLAS_URI;
   }
 
-  try {
-    const mongoUri = uri || 'mongodb://127.0.0.1:27017/lost_and_found_db';
-    const conn = await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 5000,
-    });
+  const mongoUri = uri || 'mongodb://127.0.0.1:27017/lost_and_found_db';
 
+  try {
+    const conn = await mongoose.connect(mongoUri, {
+      serverSelectionTimeoutMS: 10000,
+    });
+    global.dbConnectionError = null;
     console.log(`✅ MongoDB Connected Successfully: ${conn.connection.host} (${conn.connection.name})`);
   } catch (error) {
-    console.warn(`⚠️  MongoDB Connection Notice: ${error.message}`);
-    console.warn('💡 The web app is running in Standalone Mode. Connect a cloud MONGO_URI anytime to enable persistent database storage.');
+    console.warn(`⚠️  Primary MongoDB Connection Failed (${error.message}).`);
+    if (isProduction && mongoUri !== DEFAULT_ATLAS_URI) {
+      try {
+        console.log('🔄 Retrying with verified MongoDB Atlas Cluster URI...');
+        const fallbackConn = await mongoose.connect(DEFAULT_ATLAS_URI, {
+          serverSelectionTimeoutMS: 10000,
+        });
+        global.dbConnectionError = null;
+        console.log(`✅ MongoDB Connected Successfully via Fallback: ${fallbackConn.connection.host} (${fallbackConn.connection.name})`);
+        return;
+      } catch (fallbackErr) {
+        global.dbConnectionError = fallbackErr.message;
+        console.warn(`⚠️  Fallback Atlas Connection Error: ${fallbackErr.message}`);
+      }
+    } else {
+      global.dbConnectionError = error.message;
+    }
+    console.warn('💡 Running in Standalone Fallback Mode until MongoDB connection recovers.');
   }
 };
 

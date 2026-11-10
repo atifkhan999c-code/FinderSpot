@@ -12,11 +12,11 @@ const { protect, optionalAuth } = require('../middleware/authMiddleware');
 const { submissionLimiter } = require('../middleware/securityMiddleware');
 const upload = require('../services/uploadService');
 
-// Get all lost items / create new report
+// Get all lost items / create new report (Requires login)
 router
   .route('/')
-  .get(getAllLostItems)
-  .post(submissionLimiter, optionalAuth, upload.single('image'), createLostItem);
+  .get(protect, getAllLostItems)
+  .post(protect, submissionLimiter, upload.single('image'), createLostItem);
 
 // Logged-in user's own reported lost items
 router.get('/my-reports', protect, getMyLostItems);
@@ -24,7 +24,7 @@ router.get('/my-reports', protect, getMyLostItems);
 // Individual item operations
 router
   .route('/:id')
-  .get(getLostItemById)
+  .get(protect, getLostItemById)
   .put(protect, upload.single('image'), updateLostItem)
   .delete(protect, deleteLostItem);
 
