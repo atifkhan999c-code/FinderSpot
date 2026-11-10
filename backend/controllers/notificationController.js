@@ -1,4 +1,6 @@
 const Notification = require('../models/Notification');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Get all notifications for logged-in user
@@ -7,6 +9,17 @@ const Notification = require('../models/Notification');
  */
 const getUserNotifications = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const notifications = await SupabaseDB.getUserNotifications(req.user._id);
+      const unreadCount = notifications.filter((n) => !n.read).length;
+      return res.status(200).json({
+        success: true,
+        unreadCount,
+        count: notifications.length,
+        data: notifications,
+      });
+    }
+
     const notifications = await Notification.find({ recipient: req.user._id })
       .sort({ createdAt: -1 })
       .limit(50);
@@ -37,6 +50,20 @@ const getUserNotifications = async (req, res) => {
  */
 const markAsRead = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const notification = await SupabaseDB.markNotificationRead(req.params.id, req.user._id);
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: 'Notification not found or unauthorized',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        data: notification,
+      });
+    }
+
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, recipient: req.user._id },
       { read: true },
@@ -69,6 +96,14 @@ const markAsRead = async (req, res) => {
  */
 const markAllAsRead = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      await SupabaseDB.markAllNotificationsRead(req.user._id);
+      return res.status(200).json({
+        success: true,
+        message: 'All notifications marked as read',
+      });
+    }
+
     await Notification.updateMany(
       { recipient: req.user._id, read: false },
       { read: true }
@@ -93,6 +128,20 @@ const markAllAsRead = async (req, res) => {
  */
 const deleteNotification = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const notification = await SupabaseDB.deleteNotification(req.params.id, req.user._id);
+      if (!notification) {
+        return res.status(404).json({
+          success: false,
+          message: 'Notification not found or unauthorized',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'Notification deleted successfully',
+      });
+    }
+
     const notification = await Notification.findOneAndDelete({
       _id: req.params.id,
       recipient: req.user._id,

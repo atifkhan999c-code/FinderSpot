@@ -23,6 +23,7 @@ const {
   configureHelmet,
 } = require('./middleware/securityMiddleware');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { isSupabaseDbReady, checkSupabaseConnection, SUPABASE_URL } = require('./config/supabase');
 
 const app = express();
 
@@ -88,11 +89,29 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'online',
     service: 'Lost and Found Web API',
-    database: mongoose.connection.readyState === 1 ? 'connected' : 'fallback',
+    database: isSupabaseDbReady()
+      ? 'supabase-connected'
+      : mongoose.connection.readyState === 1
+      ? 'connected'
+      : 'fallback',
+    supabase: {
+      url: SUPABASE_URL,
+      configured: isSupabaseDbReady(),
+      storageBucket: 'item-images',
+    },
     databaseNotice: global.dbConnectionError || null,
     security: 'Helmet CSP & Rate Limiting Active',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
+  });
+});
+
+app.get('/api/supabase/health', async (req, res) => {
+  const status = await checkSupabaseConnection();
+  res.status(status.reachable ? 200 : 503).json({
+    success: status.reachable,
+    ...status,
+    dbAdapterReady: isSupabaseDbReady(),
   });
 });
 

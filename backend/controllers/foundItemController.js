@@ -5,6 +5,8 @@ const Notification = require('../models/Notification');
 const { emitMatchAlert, broadcast } = require('../services/socketService');
 const EmailService = require('../services/emailService');
 const { MOCK_FOUND_ITEMS } = require('../data/mockData');
+const { isSupabaseDbReady, uploadImageToSupabase } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Create a new found item report
@@ -28,7 +30,8 @@ const createFoundItem = async (req, res) => {
 
     let imageUrl = req.body.image || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+      const supaUrl = await uploadImageToSupabase(req.file, 'found');
+      imageUrl = supaUrl || `/uploads/${req.file.filename}`;
     }
 
     let coordinates = null;
@@ -60,6 +63,69 @@ const createFoundItem = async (req, res) => {
     };
     if (locationPoint) {
       itemData.locationPoint = locationPoint;
+    }
+
+    if (isSupabaseDbReady()) {
+      if (!title || !category || !location || !description) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please provide title, category, location, and description',
+        });
+      }
+      const foundItem = await SupabaseDB.createItem('found', itemData);
+
+      // Match detection against active lost items
+      const candidateLost = await SupabaseDB.queryItems('lost', { category: foundItem.category, status: 'active' });
+      const titleTokens = foundItem.title.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      const matchingLost = candidateLost
+        .filter((l) => titleTokens.some((tok) => l.title.toLowerCase().includes(tok)))
+        .slice(0, 3);
+
+      for (const lost of matchingLost) {
+        if (lost.reporter) {
+          await SupabaseDB.createNotification({
+            recipient: lost.reporter,
+            title: 'Potential Match Found for Your Lost Belonging!',
+            message: `A found item "${foundItem.title}" discovered at "${foundItem.location}" closely matches your report.`,
+            type: 'match',
+            link: `/item-details.html?id=${foundItem._id}`,
+            relatedItem: foundItem._id,
+            relatedItemModel: 'FoundItem',
+          });
+
+          emitMatchAlert(String(lost.reporter), {
+            message: `A found item "${foundItem.title}" discovered at "${foundItem.location}" closely matches your lost report "${lost.title}"!`,
+            item: foundItem,
+            matchedWith: lost,
+            link: `/item-details.html?id=${foundItem._id}&type=found`,
+          });
+        }
+
+        if (lost.reporterEmail) {
+          EmailService.sendMatchAlert({
+            recipientEmail: lost.reporterEmail,
+            recipientName: lost.reporterName,
+            lostItem: lost,
+            foundItem,
+          }).catch((err) => console.warn('Email dispatch warning:', err.message));
+        }
+      }
+
+      broadcast('new_found_item', {
+        _id: foundItem._id,
+        title: foundItem.title,
+        category: foundItem.category,
+        location: foundItem.location,
+        image: foundItem.image,
+        date: foundItem.date,
+        type: 'found',
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: 'Found item report published successfully',
+        data: foundItem,
+      });
     }
 
     if (mongoose.connection.readyState !== 1) {
@@ -159,6 +225,17 @@ const createFoundItem = async (req, res) => {
  */
 const getAllFoundItems = async (req, res) => {
   try {
+    const { category, custody, status, sort, q } = req.query;
+
+    if (isSupabaseDbReady()) {
+      const items = await SupabaseDB.queryItems('found', { category, custody, status, sort, q });
+      return res.status(200).json({
+        success: true,
+        count: items.length,
+        data: items,
+      });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       return res.status(200).json({
         success: true,
@@ -167,7 +244,6 @@ const getAllFoundItems = async (req, res) => {
       });
     }
 
-    const { category, custody, status, sort, q } = req.query;
     let query = {};
 
     if (category && category !== 'all') {
@@ -220,6 +296,17 @@ const getAllFoundItems = async (req, res) => {
  */
 const getFoundItemById = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const item = await SupabaseDB.getItemById('found', req.params.id);
+      if (!item) {
+        return res.status(404).json({
+          success: false,
+          message: 'Found item report not found',
+        });
+      }
+      return res.status(200).json({ success: true, data: item });
+    }
+
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).json({
         success: false,
@@ -266,6 +353,34 @@ const getFoundItemById = async (req, res) => {
  */
 const updateFoundItem = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const existing = await SupabaseDB.getItemById('found', req.params.id);
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          message: 'Found item not found',
+        });
+      }
+      const isOwner = existing.reporter && String(existing.reporter) === String(req.user._id);
+      const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to update this found item report',
+        });
+      }
+      if (req.file) {
+        const supaUrl = await uploadImageToSupabase(req.file, 'found');
+        req.body.image = supaUrl || `/uploads/${req.file.filename}`;
+      }
+      const updated = await SupabaseDB.updateItem('found', req.params.id, req.body);
+      return res.status(200).json({
+        success: true,
+        message: 'Found report updated successfully',
+        data: updated,
+      });
+    }
+
     let item = await FoundItem.findById(req.params.id);
 
     if (!item) {
@@ -314,6 +429,29 @@ const updateFoundItem = async (req, res) => {
  */
 const deleteFoundItem = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const existing = await SupabaseDB.getItemById('found', req.params.id);
+      if (!existing) {
+        return res.status(404).json({
+          success: false,
+          message: 'Found item not found',
+        });
+      }
+      const isOwner = existing.reporter && String(existing.reporter) === String(req.user._id);
+      const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to delete this found item report',
+        });
+      }
+      await SupabaseDB.deleteItem('found', req.params.id);
+      return res.status(200).json({
+        success: true,
+        message: 'Found item report deleted successfully',
+      });
+    }
+
     const item = await FoundItem.findById(req.params.id);
 
     if (!item) {
@@ -354,6 +492,26 @@ const deleteFoundItem = async (req, res) => {
  */
 const getMyFoundItems = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const items = await SupabaseDB.queryItems('found', { reporterId: req.user._id });
+      return res.status(200).json({
+        success: true,
+        count: items.length,
+        data: items,
+      });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      const items = MOCK_FOUND_ITEMS.filter(
+        (i) => i.reporterEmail && req.user.email && i.reporterEmail.toLowerCase() === req.user.email.toLowerCase()
+      );
+      return res.status(200).json({
+        success: true,
+        count: items.length,
+        data: items,
+      });
+    }
+
     const items = await FoundItem.find({ reporter: req.user._id }).sort({ createdAt: -1 });
 
     res.status(200).json({

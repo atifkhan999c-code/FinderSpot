@@ -2,6 +2,22 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const { MOCK_USERS } = require('../data/mockData');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
+
+async function resolveUserById(id) {
+  if (isSupabaseDbReady()) {
+    return await SupabaseDB.findUserById(id);
+  }
+  if (mongoose.connection.readyState === 1) {
+    return await User.findById(id).select('-password');
+  }
+  const pool = global.fallbackUsers || MOCK_USERS;
+  const found = pool.find((u) => String(u._id) === String(id));
+  if (!found) return null;
+  const { password: _, ...safe } = found;
+  return safe;
+}
 
 /**
  * Protect route with JWT authentication
@@ -20,16 +36,7 @@ const protect = async (req, res, next) => {
         process.env.JWT_SECRET || 'super_secret_jwt_key_finderspot_2026_campus_auth'
       );
 
-      if (mongoose.connection.readyState !== 1) {
-        const pool = global.fallbackUsers || MOCK_USERS;
-        const found = pool.find((u) => String(u._id) === String(decoded.id));
-        if (found) {
-          const { password: _, ...safe } = found;
-          req.user = safe;
-        }
-      } else {
-        req.user = await User.findById(decoded.id).select('-password');
-      }
+      req.user = await resolveUserById(decoded.id);
 
       if (!req.user) {
         return res.status(401).json({
@@ -83,7 +90,7 @@ const optionalAuth = async (req, res, next) => {
         token,
         process.env.JWT_SECRET || 'super_secret_jwt_key_finderspot_2026_campus_auth'
       );
-      req.user = await User.findById(decoded.id).select('-password');
+      req.user = await resolveUserById(decoded.id);
     } catch (e) {
       req.user = null;
     }

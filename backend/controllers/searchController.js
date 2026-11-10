@@ -9,6 +9,8 @@ const {
   formatDistance,
   resolveItemCoordinates,
 } = require('../services/geoService');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Unified search across both Lost and Found collections
@@ -17,6 +19,34 @@ const {
  */
 const searchAllItems = async (req, res) => {
   try {
+    const { q, type, category, status, sort } = req.query;
+
+    if (isSupabaseDbReady()) {
+      let results = [];
+      if (!type || type === 'all') {
+        const [lostItems, foundItems] = await Promise.all([
+          SupabaseDB.queryItems('lost', { category, status, sort, q }),
+          SupabaseDB.queryItems('found', { category, status, sort, q }),
+        ]);
+        results = [...lostItems, ...foundItems];
+        results.sort((a, b) => {
+          const dateA = new Date(a.date || a.createdAt);
+          const dateB = new Date(b.date || b.createdAt);
+          return sort === 'oldest' ? dateA - dateB : dateB - dateA;
+        });
+      } else if (type === 'lost') {
+        results = await SupabaseDB.queryItems('lost', { category, status, sort, q });
+      } else if (type === 'found') {
+        results = await SupabaseDB.queryItems('found', { category, status, sort, q });
+      }
+
+      return res.status(200).json({
+        success: true,
+        totalCount: results.length,
+        data: results,
+      });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       const all = [...MOCK_LOST_ITEMS, ...MOCK_FOUND_ITEMS];
       return res.status(200).json({
@@ -25,8 +55,6 @@ const searchAllItems = async (req, res) => {
         data: all,
       });
     }
-
-    const { q, type, category, status, sort } = req.query;
 
     let baseFilter = {};
 
@@ -104,21 +132,6 @@ const searchAllItems = async (req, res) => {
  */
 const getMapItems = async (req, res) => {
   try {
-    if (mongoose.connection.readyState !== 1) {
-      const all = [...MOCK_LOST_ITEMS, ...MOCK_FOUND_ITEMS].map((item) => ({
-        ...item,
-        distanceMeters: 250,
-        distanceText: '250 m away',
-      }));
-      return res.status(200).json({
-        success: true,
-        center: { lat: 40.7295, lng: -73.9965, name: 'Campus Center Plaza' },
-        radiusMeters: 5000,
-        totalCount: all.length,
-        data: all,
-      });
-    }
-
     const {
       lat,
       lng,
@@ -133,38 +146,61 @@ const getMapItems = async (req, res) => {
     const centerLng = lng ? parseFloat(lng) : DEFAULT_CAMPUS_CENTER.lng;
     const maxRadius = radius === 'all' ? Infinity : parseFloat(radius) || 5000;
 
-    let baseFilter = {};
-
-    if (category && category !== 'all') {
-      baseFilter.category = category;
-    }
-
-    if (status && status !== 'all') {
-      baseFilter.status = status;
-    } else {
-      // By default show active, claimed, and returned (exclude deleted/archived)
-      baseFilter.status = { $ne: 'archived' };
-    }
-
-    if (q && q.trim()) {
-      baseFilter.$or = [
-        { title: { $regex: q.trim(), $options: 'i' } },
-        { description: { $regex: q.trim(), $options: 'i' } },
-        { location: { $regex: q.trim(), $options: 'i' } },
-        { tags: { $regex: q.trim(), $options: 'i' } },
-      ];
-    }
-
     let items = [];
 
-    if (type === 'all' || type === 'lost') {
-      const lost = await LostItem.find(baseFilter).lean();
-      items.push(...lost.map((it) => ({ ...it, type: 'lost' })));
-    }
+    if (isSupabaseDbReady()) {
+      const queries = [];
+      if (type === 'all' || type === 'lost') queries.push(SupabaseDB.queryItems('lost', { category, status, q }));
+      if (type === 'all' || type === 'found') queries.push(SupabaseDB.queryItems('found', { category, status, q }));
+      const fetched = await Promise.all(queries);
+      fetched.forEach((arr) => items.push(...arr));
+    } else {
+      if (mongoose.connection.readyState !== 1) {
+        const all = [...MOCK_LOST_ITEMS, ...MOCK_FOUND_ITEMS].map((item) => ({
+          ...item,
+          distanceMeters: 250,
+          distanceText: '250 m away',
+        }));
+        return res.status(200).json({
+          success: true,
+          center: { lat: 40.7295, lng: -73.9965, name: 'Campus Center Plaza' },
+          radiusMeters: 5000,
+          totalCount: all.length,
+          data: all,
+        });
+      }
 
-    if (type === 'all' || type === 'found') {
-      const found = await FoundItem.find(baseFilter).lean();
-      items.push(...found.map((it) => ({ ...it, type: 'found' })));
+      let baseFilter = {};
+
+      if (category && category !== 'all') {
+        baseFilter.category = category;
+      }
+
+      if (status && status !== 'all') {
+        baseFilter.status = status;
+      } else {
+        // By default show active, claimed, and returned (exclude deleted/archived)
+        baseFilter.status = { $ne: 'archived' };
+      }
+
+      if (q && q.trim()) {
+        baseFilter.$or = [
+          { title: { $regex: q.trim(), $options: 'i' } },
+          { description: { $regex: q.trim(), $options: 'i' } },
+          { location: { $regex: q.trim(), $options: 'i' } },
+          { tags: { $regex: q.trim(), $options: 'i' } },
+        ];
+      }
+
+      if (type === 'all' || type === 'lost') {
+        const lost = await LostItem.find(baseFilter).lean();
+        items.push(...lost.map((it) => ({ ...it, type: 'lost' })));
+      }
+
+      if (type === 'all' || type === 'found') {
+        const found = await FoundItem.find(baseFilter).lean();
+        items.push(...found.map((it) => ({ ...it, type: 'found' })));
+      }
     }
 
     // Process coordinates and calculate proximity distance

@@ -2,10 +2,14 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const { MOCK_USERS } = require('../data/mockData');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 if (!global.fallbackUsers) {
   global.fallbackUsers = MOCK_USERS.map((u) => ({ ...u, password: 'password123' }));
 }
+
+const EMAIL_REGEX = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 
 /**
  * Generate JSON Web Token
@@ -43,6 +47,36 @@ const registerUser = async (req, res) => {
     let assignedRole = 'Student';
     if (role && allowedPublicRoles.includes(role)) {
       assignedRole = role;
+    }
+
+    if (isSupabaseDbReady()) {
+      if (!EMAIL_REGEX.test(emailClean)) {
+        return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+      }
+      if (password.length < 6) {
+        return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+      }
+      const exists = await SupabaseDB.findUserByEmail(emailClean);
+      if (exists) {
+        return res.status(400).json({ success: false, message: 'A user with this email address is already registered' });
+      }
+      const user = await SupabaseDB.createUser({
+        name,
+        email: emailClean,
+        password,
+        phone,
+        role: assignedRole,
+        studentId,
+        department,
+      });
+      return res.status(201).json({
+        success: true,
+        message: 'Account created successfully',
+        data: {
+          ...user,
+          token: generateToken(user._id),
+        },
+      });
     }
 
     if (mongoose.connection.readyState !== 1) {
@@ -139,6 +173,25 @@ const loginUser = async (req, res) => {
 
     const emailClean = email.trim().toLowerCase();
 
+    if (isSupabaseDbReady()) {
+      const user = await SupabaseDB.findUserByEmail(emailClean, true);
+      if (!user || !(await SupabaseDB.verifyPassword(password, user.passwordHash))) {
+        return res.status(401).json({
+          success: false,
+          message: 'Invalid email address or password',
+        });
+      }
+      const { passwordHash: _, ...safeUser } = user;
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: {
+          ...safeUser,
+          token: generateToken(user._id),
+        },
+      });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       const matched = global.fallbackUsers.find(
         (u) => u.email.toLowerCase() === emailClean && u.password === password
@@ -200,6 +253,14 @@ const loginUser = async (req, res) => {
  */
 const getUserProfile = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const user = await SupabaseDB.findUserById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      return res.status(200).json({ success: true, data: user });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       return res.status(200).json({ success: true, data: req.user });
     }
@@ -230,6 +291,18 @@ const getUserProfile = async (req, res) => {
  */
 const updateUserProfile = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const updatedUser = await SupabaseDB.updateUser(req.user._id, req.body);
+      if (!updatedUser) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      return res.status(200).json({
+        success: true,
+        message: 'Profile updated successfully',
+        data: updatedUser,
+      });
+    }
+
     const user = await User.findById(req.user._id);
 
     if (!user) {

@@ -5,11 +5,13 @@ const Notification = require('../models/Notification');
 const { emitMatchAlert, broadcast } = require('../services/socketService');
 const EmailService = require('../services/emailService');
 const { MOCK_LOST_ITEMS } = require('../data/mockData');
+const { isSupabaseDbReady, uploadImageToSupabase } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Create a new lost item report
  * @route   POST /api/lost-items
- * @access  Public / Optional Auth
+ * @access  Private
  */
 const createLostItem = async (req, res) => {
   try {
@@ -28,7 +30,8 @@ const createLostItem = async (req, res) => {
 
     let imageUrl = req.body.image || 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=800&q=80';
     if (req.file) {
-      imageUrl = `/uploads/${req.file.filename}`;
+      const supaUrl = await uploadImageToSupabase(req.file, 'lost');
+      imageUrl = supaUrl || `/uploads/${req.file.filename}`;
     }
 
     let coordinates = null;
@@ -60,6 +63,26 @@ const createLostItem = async (req, res) => {
     };
     if (locationPoint) {
       itemData.locationPoint = locationPoint;
+    }
+
+    if (isSupabaseDbReady()) {
+      if (!title || !category || !location || !description) {
+        return res.status(400).json({ success: false, message: 'Please provide title, category, location, and description' });
+      }
+      const lostItem = await SupabaseDB.createItem('lost', itemData);
+      broadcast('new_report_published', {
+        id: lostItem._id,
+        title: lostItem.title,
+        category: lostItem.category,
+        location: lostItem.location,
+        date: lostItem.date,
+        type: 'lost',
+      });
+      return res.status(201).json({
+        success: true,
+        message: 'Lost item report published successfully',
+        data: lostItem,
+      });
     }
 
     if (mongoose.connection.readyState !== 1) {
@@ -158,6 +181,13 @@ const createLostItem = async (req, res) => {
  */
 const getAllLostItems = async (req, res) => {
   try {
+    const { category, status, sort, q } = req.query;
+
+    if (isSupabaseDbReady()) {
+      const items = await SupabaseDB.queryItems('lost', { category, status, sort, q });
+      return res.status(200).json({ success: true, count: items.length, data: items });
+    }
+
     if (mongoose.connection.readyState !== 1) {
       return res.status(200).json({
         success: true,
@@ -166,7 +196,6 @@ const getAllLostItems = async (req, res) => {
       });
     }
 
-    const { category, status, sort, q } = req.query;
     let query = {};
 
     if (category && category !== 'all') {
@@ -211,20 +240,29 @@ const getAllLostItems = async (req, res) => {
 /**
  * @desc    Get single lost item by ID
  * @route   GET /api/lost-items/:id
- * @access  Public
+ * @access  Private
  */
 const getLostItemById = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const item = await SupabaseDB.getItemById('lost', req.params.id);
+      if (!item) {
+        return res.status(404).json({ success: false, message: 'Lost item report not found' });
+      }
+      return res.status(200).json({ success: true, data: item });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      const mock = MOCK_LOST_ITEMS.find((i) => i._id === req.params.id);
+      if (!mock) return res.status(404).json({ success: false, message: 'Lost item report not found' });
+      return res.status(200).json({ success: true, data: mock });
+    }
+
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(404).json({
         success: false,
         message: 'Lost item report not found',
       });
-    }
-
-    if (mongoose.connection.readyState !== 1) {
-      const mock = MOCK_LOST_ITEMS.find((i) => i._id === req.params.id) || MOCK_LOST_ITEMS[0];
-      return res.status(200).json({ success: true, data: mock });
     }
 
     const item = await LostItem.findById(req.params.id);
@@ -261,6 +299,24 @@ const getLostItemById = async (req, res) => {
  */
 const updateLostItem = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const existing = await SupabaseDB.getItemById('lost', req.params.id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'Lost item not found' });
+      }
+      const isOwner = existing.reporter && String(existing.reporter) === String(req.user._id);
+      const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ success: false, message: 'Not authorized to update this lost item report' });
+      }
+      if (req.file) {
+        const supaUrl = await uploadImageToSupabase(req.file, 'lost');
+        req.body.image = supaUrl || `/uploads/${req.file.filename}`;
+      }
+      const updated = await SupabaseDB.updateItem('lost', req.params.id, req.body);
+      return res.status(200).json({ success: true, message: 'Report updated successfully', data: updated });
+    }
+
     let item = await LostItem.findById(req.params.id);
 
     if (!item) {
@@ -309,6 +365,20 @@ const updateLostItem = async (req, res) => {
  */
 const deleteLostItem = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const existing = await SupabaseDB.getItemById('lost', req.params.id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'Lost item not found' });
+      }
+      const isOwner = existing.reporter && String(existing.reporter) === String(req.user._id);
+      const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ success: false, message: 'Not authorized to delete this lost item report' });
+      }
+      await SupabaseDB.deleteItem('lost', req.params.id);
+      return res.status(200).json({ success: true, message: 'Lost item report deleted successfully' });
+    }
+
     const item = await LostItem.findById(req.params.id);
 
     if (!item) {
@@ -349,6 +419,18 @@ const deleteLostItem = async (req, res) => {
  */
 const getMyLostItems = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const items = await SupabaseDB.queryItems('lost', { reporterId: req.user._id });
+      return res.status(200).json({ success: true, count: items.length, data: items });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      const items = MOCK_LOST_ITEMS.filter(
+        (i) => i.reporterEmail && req.user.email && i.reporterEmail.toLowerCase() === req.user.email.toLowerCase()
+      );
+      return res.status(200).json({ success: true, count: items.length, data: items });
+    }
+
     const items = await LostItem.find({ reporter: req.user._id }).sort({ createdAt: -1 });
 
     res.status(200).json({

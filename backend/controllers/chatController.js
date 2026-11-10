@@ -4,6 +4,8 @@ const LostItem = require('../models/LostItem');
 const FoundItem = require('../models/FoundItem');
 const User = require('../models/User');
 const { emitChatMessage, emitConversationRead } = require('../services/socketService');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Get all conversations for the authenticated user
@@ -13,6 +15,51 @@ const { emitChatMessage, emitConversationRead } = require('../services/socketSer
 const getUserConversations = async (req, res) => {
   try {
     const userId = req.user._id;
+
+    if (isSupabaseDbReady()) {
+      const conversations = await SupabaseDB.getUserConversations(userId);
+      const otherIds = [
+        ...new Set(
+          conversations
+            .map((c) => (c.participant_ids || []).find((pid) => String(pid) !== String(userId)))
+            .filter(Boolean)
+        ),
+      ];
+      const fetchedUsers = await Promise.all(otherIds.map((pid) => SupabaseDB.findUserById(pid)));
+      const userMap = new Map();
+      fetchedUsers.forEach((u) => {
+        if (u) userMap.set(String(u._id), u);
+      });
+
+      const formatted = conversations.map((conv) => {
+        const otherPid = (conv.participant_ids || []).find((pid) => String(pid) !== String(userId));
+        const recipient = (otherPid && userMap.get(String(otherPid))) || {
+          name: 'Campus User',
+          role: 'Community Member',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
+        };
+        const unread = (conv.unread_counts && conv.unread_counts[String(userId)]) || 0;
+        return {
+          _id: String(conv.id),
+          item: conv.item_id ? String(conv.item_id) : null,
+          itemModel: conv.item_model,
+          itemTitle: conv.item_title || 'Item Inquiry',
+          itemImage:
+            conv.item_image ||
+            'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&w=300&q=80',
+          recipient,
+          lastMessage: conv.last_message || null,
+          unreadCount: unread,
+          updatedAt: conv.updated_at,
+        };
+      });
+
+      return res.status(200).json({
+        success: true,
+        count: formatted.length,
+        data: formatted,
+      });
+    }
 
     const conversations = await Conversation.find({ participants: userId })
       .populate('participants', 'name email role avatar trustPoints department')
@@ -72,6 +119,57 @@ const getOrCreateConversation = async (req, res) => {
   try {
     const currentUserId = req.user._id;
     const { itemId, itemModel = 'FoundItem', recipientId } = req.body;
+
+    if (isSupabaseDbReady()) {
+      let targetRecipientId = recipientId;
+      let itemTitle = 'Property Discussion';
+      let itemImage = '';
+
+      if (itemId) {
+        const itemType = itemModel === 'LostItem' ? 'lost' : 'found';
+        const item = await SupabaseDB.getItemById(itemType, itemId);
+        if (item) {
+          itemTitle = item.title;
+          itemImage = item.image;
+          if (!targetRecipientId && item.reporter) {
+            targetRecipientId = String(item.reporter);
+          }
+        }
+      }
+
+      if (!targetRecipientId || String(targetRecipientId) === String(currentUserId)) {
+        const allUsers = await SupabaseDB.listAllUsers();
+        const securityOfficer = allUsers.find(
+          (u) => u.role === 'Security' && String(u._id) !== String(currentUserId)
+        );
+        const fallbackUser =
+          securityOfficer || allUsers.find((u) => String(u._id) !== String(currentUserId));
+        if (fallbackUser) {
+          targetRecipientId = String(fallbackUser._id);
+        }
+      }
+
+      if (!targetRecipientId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Unable to resolve conversation recipient.',
+        });
+      }
+
+      const conv = await SupabaseDB.getOrCreateConversation({
+        currentUserId,
+        recipientId: targetRecipientId,
+        itemId,
+        itemModel,
+        itemTitle,
+        itemImage,
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: conv,
+      });
+    }
 
     let targetRecipientId = recipientId;
     let itemTitle = 'Property Discussion';
@@ -156,6 +254,31 @@ const getMessages = async (req, res) => {
     const { id } = req.params;
     const userId = req.user._id;
 
+    if (isSupabaseDbReady()) {
+      const conv = await SupabaseDB.getConversationById(id);
+      if (!conv) {
+        return res.status(404).json({
+          success: false,
+          message: 'Conversation not found',
+        });
+      }
+      const isParticipant = (conv.participant_ids || []).some(
+        (p) => String(p) === String(userId)
+      );
+      if (!isParticipant && req.user.role !== 'Admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to view messages in this conversation',
+        });
+      }
+      const messages = await SupabaseDB.getMessages(id);
+      return res.status(200).json({
+        success: true,
+        count: messages.length,
+        data: messages,
+      });
+    }
+
     const conv = await Conversation.findById(id);
     if (!conv) {
       return res.status(404).json({
@@ -209,6 +332,38 @@ const sendMessage = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Message text cannot be empty',
+      });
+    }
+
+    if (isSupabaseDbReady()) {
+      const conv = await SupabaseDB.getConversationById(id);
+      if (!conv) {
+        return res.status(404).json({
+          success: false,
+          message: 'Conversation not found',
+        });
+      }
+      const isParticipant = (conv.participant_ids || []).some(
+        (p) => String(p) === String(sender._id)
+      );
+      if (!isParticipant && sender.role !== 'Admin') {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to send messages to this conversation',
+        });
+      }
+      const otherPid = (conv.participant_ids || []).find((p) => String(p) !== String(sender._id));
+      const recipientId = otherPid ? String(otherPid) : undefined;
+      const message = await SupabaseDB.addMessage({
+        convId: id,
+        sender,
+        text,
+        attachments: Array.isArray(attachments) ? attachments : [],
+      });
+      emitChatMessage(id, message, recipientId);
+      return res.status(201).json({
+        success: true,
+        data: message,
       });
     }
 
@@ -293,6 +448,22 @@ const markAsRead = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user._id;
+
+    if (isSupabaseDbReady()) {
+      const conv = await SupabaseDB.getConversationById(id);
+      if (!conv) {
+        return res.status(404).json({
+          success: false,
+          message: 'Conversation not found',
+        });
+      }
+      await SupabaseDB.markConversationRead(id, userId);
+      emitConversationRead(id, String(userId));
+      return res.status(200).json({
+        success: true,
+        message: 'Conversation marked as read',
+      });
+    }
 
     const conv = await Conversation.findById(id);
     if (!conv) {

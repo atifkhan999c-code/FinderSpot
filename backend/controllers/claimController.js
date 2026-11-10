@@ -5,6 +5,8 @@ const LostItem = require('../models/LostItem');
 const Notification = require('../models/Notification');
 const { emitClaimAlert } = require('../services/socketService');
 const EmailService = require('../services/emailService');
+const { isSupabaseDbReady, uploadImageToSupabase } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Submit ownership claim verification for an item
@@ -19,6 +21,70 @@ const submitClaim = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Please provide all required claim details and verification answer',
+      });
+    }
+
+    if (isSupabaseDbReady()) {
+      const modelName = itemModel === 'LostItem' ? 'LostItem' : 'FoundItem';
+      const itemType = modelName === 'LostItem' ? 'lost' : 'found';
+      const targetItem = await SupabaseDB.getItemById(itemType, itemId);
+
+      if (!targetItem) {
+        return res.status(404).json({
+          success: false,
+          message: 'Target item to claim does not exist',
+        });
+      }
+
+      let proofImageUrl = '';
+      if (req.file) {
+        const supaUrl = await uploadImageToSupabase(req.file, 'claims');
+        proofImageUrl = supaUrl || `/uploads/${req.file.filename}`;
+      }
+
+      const claim = await SupabaseDB.createClaim({
+        item: itemId,
+        itemModel: modelName,
+        claimant: req.user ? req.user._id : null,
+        claimantName,
+        claimantEmail,
+        claimantPhone: claimantPhone || '',
+        proofDetails,
+        proofImage: proofImageUrl,
+      });
+
+      if (targetItem.reporter) {
+        await SupabaseDB.createNotification({
+          recipient: targetItem.reporter,
+          title: 'New Ownership Claim Submitted!',
+          message: `${claimantName} submitted a verification proof claim on your reported item "${targetItem.title}".`,
+          type: 'claim',
+          link: `/my-reports.html`,
+          relatedItem: targetItem._id,
+          relatedItemModel: modelName,
+        });
+
+        emitClaimAlert(String(targetItem.reporter), {
+          message: `${claimantName} submitted a verification ownership claim on "${targetItem.title}".`,
+          item: targetItem,
+          claimantName,
+          link: `/my-reports.html`,
+        });
+
+        if (targetItem.reporterEmail) {
+          EmailService.sendClaimAlert({
+            recipientEmail: targetItem.reporterEmail,
+            recipientName: targetItem.reporterName,
+            item: targetItem,
+            claim,
+          }).catch((err) => console.warn('Claim email dispatch warning:', err.message));
+        }
+      }
+
+      return res.status(201).json({
+        success: true,
+        message: 'Claim verification submitted successfully. The finder/custodian has been notified.',
+        data: claim,
       });
     }
 
@@ -127,6 +193,15 @@ const submitClaim = async (req, res) => {
  */
 const getClaimsForItem = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const claims = await SupabaseDB.getClaimsForItem(req.params.itemId);
+      return res.status(200).json({
+        success: true,
+        count: claims.length,
+        data: claims,
+      });
+    }
+
     const claims = await Claim.find({ item: req.params.itemId }).sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -155,6 +230,53 @@ const updateClaimStatus = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Invalid claim status provided',
+      });
+    }
+
+    if (isSupabaseDbReady()) {
+      const claim = await SupabaseDB.getClaimById(req.params.id);
+      if (!claim) {
+        return res.status(404).json({
+          success: false,
+          message: 'Claim not found',
+        });
+      }
+
+      const itemType = claim.itemModel === 'LostItem' ? 'lost' : 'found';
+      const targetItem = await SupabaseDB.getItemById(itemType, claim.item);
+      const isCustodian = targetItem && targetItem.reporter && String(targetItem.reporter) === String(req.user._id);
+      const isAdmin = req.user.role === 'Admin' || req.user.role === 'Security';
+
+      if (!isCustodian && !isAdmin) {
+        return res.status(403).json({
+          success: false,
+          message: 'Not authorized to approve or reject this claim',
+        });
+      }
+
+      const updatedClaim = await SupabaseDB.updateClaim(req.params.id, {
+        status,
+        reviewerNotes: reviewerNotes !== undefined ? reviewerNotes : claim.reviewerNotes,
+      });
+
+      if (status === 'approved') {
+        await SupabaseDB.updateItem(itemType, claim.item, { status: 'returned' });
+
+        if (claim.claimant) {
+          await SupabaseDB.createNotification({
+            recipient: claim.claimant,
+            title: 'Ownership Claim Approved! 🎉',
+            message: `Your claim for item verification was approved! You can now arrange pickup.`,
+            type: 'claim',
+            link: `/item-details.html?id=${claim.item}`,
+          });
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: `Claim status successfully updated to ${status}`,
+        data: updatedClaim,
       });
     }
 

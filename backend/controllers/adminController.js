@@ -6,6 +6,8 @@ const AuditLog = require('../models/AuditLog');
 const AuditService = require('../services/auditService');
 const EmailService = require('../services/emailService');
 const { notifyUser, broadcast } = require('../services/socketService');
+const { isSupabaseDbReady } = require('../config/supabase');
+const SupabaseDB = require('../services/supabaseDb');
 
 /**
  * @desc    Get dashboard metrics and analytics for Admin / Security
@@ -14,6 +16,11 @@ const { notifyUser, broadcast } = require('../services/socketService');
  */
 const getAdminStats = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const stats = await SupabaseDB.getStats();
+      return res.status(200).json({ success: true, data: stats });
+    }
+
     const [
       totalUsers,
       totalLost,
@@ -64,6 +71,53 @@ const getAdminStats = async (req, res) => {
  */
 const getAdminAnalytics = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const [lostItems, foundItems, claimsList] = await Promise.all([
+        SupabaseDB.queryItems('lost', { status: 'all' }),
+        SupabaseDB.queryItems('found', { status: 'all' }),
+        SupabaseDB.listAllClaims(),
+      ]);
+
+      const categoriesMap = {};
+      lostItems.forEach((it) => {
+        categoriesMap[it.category] = (categoriesMap[it.category] || 0) + 1;
+      });
+      foundItems.forEach((it) => {
+        categoriesMap[it.category] = (categoriesMap[it.category] || 0) + 1;
+      });
+      const categoryBreakdown = Object.keys(categoriesMap).map((cat) => ({
+        category: cat,
+        count: categoriesMap[cat],
+      }));
+
+      const locationCounts = {};
+      foundItems.forEach((it) => {
+        locationCounts[it.location] = (locationCounts[it.location] || 0) + 1;
+      });
+      const hotspots = Object.entries(locationCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([location, count]) => ({ location, count }));
+
+      const approvedClaims = claimsList.filter((c) => c.status === 'approved').length;
+      const rejectedClaims = claimsList.filter((c) => c.status === 'rejected').length;
+      const pendingClaims = claimsList.filter((c) => c.status === 'pending').length;
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          categoryBreakdown,
+          hotspots,
+          claimsBreakdown: {
+            approved: approvedClaims,
+            rejected: rejectedClaims,
+            pending: pendingClaims,
+            total: approvedClaims + rejectedClaims + pendingClaims,
+          },
+        },
+      });
+    }
+
     // 1. Category Breakdown Aggregation
     const lostByCategory = await LostItem.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } },
@@ -126,6 +180,16 @@ const getAdminAnalytics = async (req, res) => {
 const getAuditLogs = async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 50;
+
+    if (isSupabaseDbReady()) {
+      const logs = await SupabaseDB.getAuditLogs(limit, req.query.action || null);
+      return res.status(200).json({
+        success: true,
+        count: logs.length,
+        data: logs,
+      });
+    }
+
     const filter = {};
     if (req.query.action) filter.action = req.query.action;
 
@@ -148,6 +212,11 @@ const getAuditLogs = async (req, res) => {
  */
 const getAllUsers = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const users = await SupabaseDB.listAllUsers();
+      return res.status(200).json({ success: true, count: users.length, data: users });
+    }
+
     const users = await User.find().select('-password').sort({ createdAt: -1 });
     res.status(200).json({ success: true, count: users.length, data: users });
   } catch (error) {
@@ -163,6 +232,32 @@ const getAllUsers = async (req, res) => {
 const updateUserRole = async (req, res) => {
   try {
     const { role, trustPoints } = req.body;
+
+    if (isSupabaseDbReady()) {
+      const existing = await SupabaseDB.findUserById(req.params.id);
+      if (!existing) {
+        return res.status(404).json({ success: false, message: 'User not found' });
+      }
+      const previousRole = existing.role;
+      const updated = await SupabaseDB.updateUser(req.params.id, {
+        ...(role ? { role } : {}),
+        ...(trustPoints !== undefined ? { trustPoints } : {}),
+      });
+      await SupabaseDB.recordAudit({
+        actorId: req.user?._id,
+        actorName: req.user?.name,
+        action: 'USER_ROLE_UPDATED',
+        targetType: 'User',
+        targetId: updated._id,
+        details: `Updated user "${updated.name}" (${updated.email}) role from ${previousRole} to ${updated.role}. Trust points: ${updated.trustPoints}.`,
+      });
+      return res.status(200).json({
+        success: true,
+        message: 'User permissions and trust score updated successfully',
+        data: updated,
+      });
+    }
+
     const user = await User.findById(req.params.id);
 
     if (!user) {
@@ -204,6 +299,11 @@ const updateUserRole = async (req, res) => {
  */
 const getAllClaimsForAdmin = async (req, res) => {
   try {
+    if (isSupabaseDbReady()) {
+      const claims = await SupabaseDB.listAllClaims();
+      return res.status(200).json({ success: true, count: claims.length, data: claims });
+    }
+
     const claims = await Claim.find()
       .sort({ createdAt: -1 })
       .populate('claimant', 'name email role department avatar');
@@ -225,6 +325,60 @@ const updateClaimDecision = async (req, res) => {
 
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Status must be approved or rejected' });
+    }
+
+    if (isSupabaseDbReady()) {
+      const claim = await SupabaseDB.getClaimById(req.params.id);
+      if (!claim) {
+        return res.status(404).json({ success: false, message: 'Claim not found' });
+      }
+      const updatedClaim = await SupabaseDB.updateClaim(req.params.id, {
+        status,
+        reviewerNotes: reviewerNotes !== undefined ? reviewerNotes : claim.reviewerNotes,
+      });
+
+      const itemType = claim.itemModel === 'LostItem' ? 'lost' : 'found';
+      const item = await SupabaseDB.getItemById(itemType, claim.item);
+      if (item && status === 'approved') {
+        await SupabaseDB.updateItem(itemType, claim.item, { status: 'returned' });
+      }
+
+      const action = status === 'approved' ? 'CLAIM_APPROVED' : 'CLAIM_REJECTED';
+      const auditDetails =
+        status === 'approved'
+          ? `Approved ownership claim for item "${item ? item.title : 'Item'}" to claimant ${claim.claimantName}. ${
+              pickupLocker ? `Assigned Locker: ${pickupLocker}.` : ''
+            } Notes: ${reviewerNotes || 'Verified proof.'}`
+          : `Rejected claim for item "${item ? item.title : 'Item'}" from ${claim.claimantName}. Reason: ${
+              reviewerNotes || 'Unverified proof.'
+            }`;
+
+      await SupabaseDB.recordAudit({
+        actorId: req.user?._id,
+        actorName: req.user?.name,
+        action,
+        targetType: 'Claim',
+        targetId: claim._id,
+        details: auditDetails,
+      });
+
+      if (claim.claimant) {
+        notifyUser(String(claim.claimant), 'claim_status_update', {
+          claimId: claim._id,
+          status,
+          itemTitle: item ? item.title : 'Your Claimed Item',
+          pickupLocker: pickupLocker || 'Room 104 Security Desk',
+          notes: reviewerNotes,
+        });
+      }
+
+      broadcast('inventory_updated', { itemId: claim.item, status: status === 'approved' ? 'returned' : undefined });
+
+      return res.status(200).json({
+        success: true,
+        message: `Claim successfully ${status}`,
+        data: updatedClaim,
+      });
     }
 
     const claim = await Claim.findById(req.params.id);
@@ -297,6 +451,31 @@ const logCustodyIntake = async (req, res) => {
   try {
     const { itemId, lockerNumber, officerNotes } = req.body;
 
+    if (isSupabaseDbReady()) {
+      const item = await SupabaseDB.getItemById('found', itemId);
+      if (!item) {
+        return res.status(404).json({ success: false, message: 'Found item record not found' });
+      }
+      const updatedItem = await SupabaseDB.updateItem('found', itemId, {
+        custodyLocationDetails: `Locker ${lockerNumber} (Security Desk Room 104)`,
+      });
+      await SupabaseDB.recordAudit({
+        actorId: req.user?._id,
+        actorName: req.user?.name,
+        action: 'VAULT_INTAKE',
+        targetType: 'Vault',
+        targetId: updatedItem._id,
+        details: `Intake of "${updatedItem.title}" into physical vault locker ${lockerNumber}. Custody Officer: ${
+          req.user ? req.user.name : 'Officer'
+        }. Notes: ${officerNotes || 'Secure storage logged.'}`,
+      });
+      return res.status(200).json({
+        success: true,
+        message: `Item custody safely logged into Locker ${lockerNumber}`,
+        data: updatedItem,
+      });
+    }
+
     const item = await FoundItem.findById(itemId);
     if (!item) {
       return res.status(404).json({ success: false, message: 'Found item record not found' });
@@ -335,6 +514,29 @@ const logCustodyIntake = async (req, res) => {
 const deleteItemByAdmin = async (req, res) => {
   try {
     const { type, id } = req.params;
+
+    if (isSupabaseDbReady()) {
+      const itemType = type === 'lost' ? 'lost' : 'found';
+      const item = await SupabaseDB.getItemById(itemType, id);
+      if (!item) {
+        return res.status(404).json({ success: false, message: 'Item not found' });
+      }
+      const itemTitle = item.title;
+      await SupabaseDB.deleteItem(itemType, id);
+      await SupabaseDB.recordAudit({
+        actorId: req.user?._id,
+        actorName: req.user?.name,
+        action: 'ITEM_DELETED',
+        targetType: type === 'lost' ? 'LostItem' : 'FoundItem',
+        targetId: id,
+        details: `Permanently removed ${type} item report "${itemTitle}" from platform.`,
+      });
+      return res.status(200).json({
+        success: true,
+        message: 'Item permanently deleted from portal and logged to audit trail',
+      });
+    }
+
     const Model = type === 'lost' ? LostItem : FoundItem;
 
     const item = await Model.findById(id);
